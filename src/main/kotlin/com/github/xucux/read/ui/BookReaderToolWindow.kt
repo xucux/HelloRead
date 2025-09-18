@@ -11,7 +11,7 @@ import com.github.xucux.read.service.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diagnostic.logger
 import javax.swing.text.*
 import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
@@ -28,7 +28,7 @@ import javax.swing.event.ChangeListener
  */
 class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel(true, true), com.github.xucux.read.service.StatusBarReadingCallback {
     
-    private val logger = thisLogger()
+    private val logger = logger<BookReaderToolWindow>()
     private val dataStorageService = DataStorageService.getInstance()
     private val chapterParserService = ChapterParserService.getInstance()
     private val fontSettingsService = FontSettingsService.getInstance()

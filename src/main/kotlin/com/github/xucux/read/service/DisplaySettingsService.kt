@@ -4,7 +4,7 @@ import com.github.xucux.read.constants.StorageConstants
 import com.github.xucux.read.model.DisplaySettings
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diagnostic.logger
 import java.io.*
 import java.util.*
 
@@ -14,7 +14,7 @@ import java.util.*
  */
 @Service
 class DisplaySettingsService {
-    private val logger = thisLogger()
+    private val logger = logger<DisplaySettingsService>()
     
     companion object {
         @JvmStatic fun getInstance(): DisplaySettingsService {

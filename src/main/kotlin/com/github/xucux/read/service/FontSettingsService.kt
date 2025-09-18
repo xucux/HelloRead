@@ -4,7 +4,7 @@ import com.github.xucux.read.constants.StorageConstants
 import com.github.xucux.read.model.FontSettings
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diagnostic.logger
 import java.io.*
 import java.util.*
 
@@ -14,7 +14,7 @@ import java.util.*
  */
 @Service
 class FontSettingsService {
-    private val logger = thisLogger()
+    private val logger = logger<FontSettingsService>()
     
     companion object {
         @JvmStatic fun getInstance(): FontSettingsService {

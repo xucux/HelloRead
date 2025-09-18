@@ -3,7 +3,7 @@ package com.github.xucux.read.service
 import com.github.xucux.read.model.Chapter
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diagnostic.logger
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.regex.Pattern
@@ -14,7 +14,7 @@ import java.util.regex.Pattern
  */
 @Service
 class ChapterParserService {
-    private val logger = thisLogger()
+    private val logger = logger<ChapterParserService>()
     private val dataStorageService = com.github.xucux.read.service.DataStorageService.getInstance()
     
     companion object {

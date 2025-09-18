@@ -13,6 +13,7 @@ import java.awt.Font
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import javax.swing.*
+import java.util.Locale
 
 /**
  * 章节列表选择对话框
@@ -131,13 +132,13 @@ class ChapterListDialog(
      * 过滤章节列表
      */
     private fun filterChapters() {
-        val searchText = searchField.text.trim().lowercase()
+        val searchText = searchField.text.trim().lowercase(Locale.getDefault())
         
         if (searchText.isEmpty()) {
             filteredChapterTitles = allChapterTitles
         } else {
             filteredChapterTitles = allChapterTitles.filter { title ->
-                title.lowercase().contains(searchText)
+                title.lowercase(Locale.getDefault()).contains(searchText)
             }
         }
         

@@ -6,7 +6,7 @@ import com.github.xucux.read.model.ReadingMode
 import com.github.xucux.read.model.ReadingRecord
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diagnostic.logger
 
 /**
  * 阅读记录服务
@@ -14,7 +14,7 @@ import com.intellij.openapi.diagnostic.thisLogger
  */
 @Service
 class ReadingRecordService {
-    private val logger = thisLogger()
+    private val logger = logger<ReadingRecordService>()
     private val dataStorageService = DataStorageService.getInstance()
     
     companion object {

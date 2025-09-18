@@ -5,7 +5,7 @@ import com.github.xucux.read.model.ReadingMode
 import com.github.xucux.read.model.ReadingSettings
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diagnostic.logger
 import java.io.*
 import java.util.*
 
@@ -15,7 +15,7 @@ import java.util.*
  */
 @Service
 class ReadingSettingsService {
-    private val logger = thisLogger()
+    private val logger = logger<ReadingSettingsService>()
     
     companion object {
         @JvmStatic fun getInstance(): ReadingSettingsService {

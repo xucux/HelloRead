@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import java.awt.Dimension
 import java.io.File
 import java.util.*
+import java.util.Locale
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -69,7 +70,7 @@ class AddBookDialog(project: Project) : DialogWrapper(project) {
     private fun chooseFile() {
         val descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor()
             .withFileFilter { file ->
-                file.extension?.lowercase() == "txt"
+                file.extension?.lowercase(Locale.getDefault()) == "txt"
             }
             .withTitle("选择小说文件")
             .withDescription("请选择UTF-8编码的txt小说文件")
@@ -117,7 +118,7 @@ class AddBookDialog(project: Project) : DialogWrapper(project) {
             return
         }
         
-        if (!file.extension.lowercase().endsWith("txt")) {
+        if (!file.extension.lowercase(Locale.getDefault()).endsWith("txt")) {
             PopNotifyUtil.notify("格式错误", "请选择txt格式的文件")
             Messages.showErrorDialog("请选择txt格式的文件", "错误")
             return

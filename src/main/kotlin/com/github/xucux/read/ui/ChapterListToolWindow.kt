@@ -16,6 +16,7 @@ import java.awt.Font
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import javax.swing.*
+import java.util.Locale
 
 /**
  * 章节列表工具窗口
@@ -219,13 +220,13 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
      * 过滤章节
      */
     private fun filterChapters() {
-        val searchText = searchField.text.trim().lowercase()
+        val searchText = searchField.text.trim().lowercase(Locale.getDefault())
         
         if (searchText.isEmpty()) {
             filteredChapterTitles = allChapterTitles
         } else {
             filteredChapterTitles = allChapterTitles.filter { 
-                it.lowercase().contains(searchText) 
+                it.lowercase(Locale.getDefault()).contains(searchText) 
             }
         }
         

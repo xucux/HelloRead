@@ -91,8 +91,6 @@ class StatusBarReadingWidget(@NotNull project: Project) : EditorBasedStatusBarPo
      */
     @Nullable
     override fun createPopup(@NotNull dataContext: DataContext): ListPopup? {
-        // 创建简单的弹出菜单，包含基本操作
-        val actionManager = ActionManager.getInstance()
         
         // 创建ActionGroup，包含状态栏相关的操作
         val group = object : ActionGroup() {

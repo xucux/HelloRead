@@ -9,7 +9,7 @@ import com.github.xucux.read.service.DataStorageService
 import com.github.xucux.read.service.DisplaySettingsService
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.github.xucux.read.factory.StatusBarReadingWidgetFactory
 import com.github.xucux.read.widget.StatusBarReadingWidget
@@ -34,7 +34,7 @@ interface StatusBarReadingCallback {
  */
 @Service
 class StatusBarReadingService {
-    private val logger = thisLogger()
+    private val logger = logger<StatusBarReadingService>()
     
     companion object {
         @JvmStatic fun getInstance(): StatusBarReadingService {

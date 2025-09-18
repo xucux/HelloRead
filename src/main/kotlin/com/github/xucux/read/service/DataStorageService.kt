@@ -7,7 +7,7 @@ import com.github.xucux.read.model.Chapter
 import com.github.xucux.read.model.ReadingRecord
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.diagnostic.logger
 import java.io.*
 import java.util.*
 
@@ -17,7 +17,7 @@ import java.util.*
  */
 @Service
 class DataStorageService {
-    private val logger = thisLogger()
+    private val logger = logger<DataStorageService>()
     
     companion object {
         @JvmStatic fun getInstance(): DataStorageService {
