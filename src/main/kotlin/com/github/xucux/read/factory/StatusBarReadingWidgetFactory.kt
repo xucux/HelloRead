@@ -3,7 +3,6 @@ package com.github.xucux.read.factory
 import com.github.xucux.read.service.StatusBarReadingService
 import com.github.xucux.read.widget.StatusBarReadingWidget
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.NlsContexts
 import com.intellij.openapi.wm.StatusBar
 import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.StatusBarWidgetFactory
@@ -25,7 +24,7 @@ class StatusBarReadingWidgetFactory : StatusBarWidgetFactory {
     
     override fun getId(): @NotNull @NonNls String = WIDGET_ID
     
-    override fun getDisplayName(): @NotNull @NlsContexts.ConfigurableName String = DISPLAY_NAME
+    override fun getDisplayName(): @NotNull String = DISPLAY_NAME
     
     /**
      * 创建状态栏Widget

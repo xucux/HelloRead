@@ -101,10 +101,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     private fun createFontSettingsPanel(): JPanel {
         val panel = JPanel()
         panel.layout = BorderLayout()
-        panel.border = TitledBorder(JBUI.Borders.compound(
-                JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
-                JBUI.Borders.empty(10)
-        ),"字体设置")
+        panel.border = TitledBorder(JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),"字体设置")
         
         // 创建设置控件面板
         val settingsPanel = JPanel()
@@ -234,10 +231,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     private fun createDisplayOptionsPanel(): JPanel {
         val panel = JPanel()
         panel.layout = BorderLayout()
-        panel.border = TitledBorder(JBUI.Borders.compound(
-                JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
-                JBUI.Borders.empty(10)
-        ),"界面显示选项")
+        panel.border = TitledBorder(JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),"界面显示选项")
         
         // 创建选项控件面板
         val optionsPanel = JPanel()

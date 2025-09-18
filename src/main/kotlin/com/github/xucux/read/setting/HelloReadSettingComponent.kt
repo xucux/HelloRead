@@ -111,10 +111,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
         panel.layout = BorderLayout()
         
         // 设置带标题的边框
-        panel.border = TitledBorder(JBUI.Borders.compound(
-            JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
-            JBUI.Borders.empty(10)
-        ), "字体设置")
+        panel.border = TitledBorder(JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()), "字体设置")
         
         // 创建字体设置容器面板，使用垂直布局
         val settingsPanel = JPanel()
@@ -169,10 +166,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
         panel.layout = BorderLayout()
         
         // 设置带标题的边框
-        panel.border = TitledBorder(JBUI.Borders.compound(
-            JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
-            JBUI.Borders.empty(10)
-        ), "界面显示选项")
+        panel.border = TitledBorder(JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()), "界面显示选项")
         
         // 设置复选框字体
 //        val checkboxFont = Font( Font.PLAIN, 12)
@@ -220,10 +214,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
         val gbc = GridBagConstraints()
         
         // 设置带标题的边框
-        panel.border = TitledBorder(JBUI.Borders.compound(
-            JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
-            JBUI.Borders.empty(10)
-        ), "预览")
+        panel.border = TitledBorder(JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()), "预览")
         
         // 预览标签
         val previewLabel = JBLabel("字体效果预览:")
