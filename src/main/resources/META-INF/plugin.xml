@@ -1,0 +1,227 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>com.github.xucux.HelloRead</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>HelloRead</name>
+    <version>1.0.0-231</version>
+    <idea-version since-build="231" until-build="253.*"/>
+    <change-notes>
+        <![CDATA[
+    <p>1.0.0-231</p>
+    <p>- Initial release</p>
+        ]]>
+    </change-notes>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor email="xucux@foxmail.com" url="https://xucux.github.io/">xucux</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    <h3>HelloRead</h3>
+    <p><strong>HelloRead</strong> is a comprehensive novel reading plugin designed specifically for IntelliJ IDEA, providing a seamless reading experience for Chinese web novels directly within your development environment.</p>
+    
+    <h4>Key Features:</h4>
+    <ul>
+        <li><strong>📚 Bookshelf Management</strong> - Organize and manage your novel collection with ease</li>
+        <li><strong>📖 Advanced Reader</strong> - Clean, distraction-free reading interface with navigation controls</li>
+        <li><strong>🔍 Smart Chapter Parsing</strong> - Automatically detects and parses various Chinese novel chapter formats</li>
+        <li><strong>⚙️ Customizable Settings</strong> - Adjust font family, size, line spacing, and paragraph spacing</li>
+        <li><strong>💾 Local Data Storage</strong> - All reading progress and settings saved locally using Properties files</li>
+        <li><strong>⌨️ Rich Keyboard Shortcuts</strong> - Quick access to all features with customizable hotkeys</li>
+    </ul>
+    
+    <h4>Supported Formats:</h4>
+    <ul>
+        <li>UTF-8 encoded .txt files</li>
+        <li>Various Chinese chapter title patterns (第X章, 第X节, 第X回, etc.)</li>
+        <li>Pure numeric and Chinese numeric chapters</li>
+    </ul>
+    
+    <h4>Quick Start:</h4>
+    <p>Use <code>Ctrl+Alt+A</code> to add books, <code>Ctrl+Alt+B</code> to open bookshelf, and <code>Ctrl+Alt+R</code> to start reading.</p>
+    <p>Previous Chapter: <code>Alt+Numpad 4</code>, Next Chapter: <code>Alt+Numpad 6</code>, Close Reader: <code>Ctrl+Alt+Numpad 0</code></p>
+    <p>Scroll Up/Previous Line: <code>Alt+Numpad 8</code>, Scroll Down/Next Line: <code>Alt+Numpad 2</code></p>
+    <hr>
+    
+    <h3>HelloRead</h3>
+    <p><strong>HelloRead</strong> 是一款专为 IntelliJ IDEA 设计的本地小说阅读插件，为中文网络小说提供完整的阅读解决方案，让您在开发环境中享受舒适的阅读体验。</p>
+    
+    <h4>核心功能：</h4>
+    <ul>
+        <li><strong>📚 我的书架</strong> - 统一管理所有小说，显示阅读进度和最后阅读时间</li>
+        <li><strong>📖 智能阅读器</strong> - 清晰的阅读界面，支持章节导航和快速跳转</li>
+        <li><strong>🔍 智能章节解析</strong> - 自动识别多种中文网络小说章节格式</li>
+        <li><strong>⚙️ 个性化设置</strong> - 自定义字体、大小、行间距等阅读参数</li>
+        <li><strong>💾 本地数据存储</strong> - 使用 Properties 文件安全保存阅读记录和设置</li>
+        <li><strong>⌨️ 丰富快捷键</strong> - 提供完整的键盘快捷键支持，提高操作效率</li>
+    </ul>
+    
+    <h4>支持格式：</h4>
+    <ul>
+        <li>UTF-8 编码的 .txt 文件</li>
+        <li>多种中文章节标题格式（第X章、第X节、第X回等）</li>
+        <li>纯数字和中文数字章节</li>
+    </ul>
+    
+    <h4>快速开始：</h4>
+    <p>使用 <code>Ctrl+Alt+A</code> 添加书籍，<code>Ctrl+Alt+B</code> 打开书架，<code>Ctrl+Alt+R</code> 开始阅读。</p>
+    <p>上一章：<code>Alt+Numpad 4</code>，下一章：<code>Alt+Numpad 6</code>，关闭阅读器：<code>Ctrl+Alt+Numpad 0</code></p>
+    <p>向上滚动/上一行：<code>Alt+Numpad 8</code>，向下滚动/下一行：<code>Alt+Numpad 2</code></p>
+    <p></p>
+    ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- HelloRead 主工具窗口，整合书架、阅读器、章节列表和设置 -->
+        <toolWindow id="HelloRead" 
+                    anchor="left" 
+                    factoryClass="com.github.xucux.read.factory.HelloReadToolWindowFactory"
+                    icon="/META-INF/pluginIcon.svg"/>
+
+        <applicationConfigurable instance="com.github.xucux.read.setting.HelloReadSettingComponent"
+                                 id="com.github.xucux.read.setting.HelloReadSettingComponent" displayName="HelloRead"/>
+        
+        <!-- 状态栏阅读Widget工厂 -->
+        <statusBarWidgetFactory id="HelloRead.StatusBarReading"
+                                implementation="com.github.xucux.read.factory.StatusBarReadingWidgetFactory"/>
+    </extensions>
+    
+    <!-- 菜单和工具栏配置 -->
+    <actions>
+
+        <!-- 主菜单 -->
+        <group id="ReadBook.MainMenu" text="HelloRead" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            
+            <!-- 打开HelloRead主窗口 -->
+            <action id="ReadBook.OpenHelloRead" 
+                    class="com.github.xucux.read.action.OpenHelloReadAction"
+                    text="打开HelloRead"
+                    description="打开HelloRead主窗口">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt B"/>
+            </action>
+            
+            <!-- 打开书架标签页 -->
+            <action id="ReadBook.OpenBookshelf" 
+                    class="com.github.xucux.read.action.OpenBookshelfAction"
+                    text="我的书架"
+                    description="打开书架标签页">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 1"/>
+            </action>
+            
+            <!-- 打开阅读器标签页 -->
+            <action id="ReadBook.OpenReader" 
+                    class="com.github.xucux.read.action.OpenReaderAction"
+                    text="阅读器"
+                    description="打开阅读器标签页">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 2"/>
+            </action>
+            
+            <!-- 打开章节列表标签页 -->
+            <action id="ReadBook.OpenChapterList" 
+                    class="com.github.xucux.read.action.OpenChapterListAction"
+                    text="章节列表"
+                    description="打开章节列表标签页">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 3"/>
+            </action>
+            
+            <!-- 打开设置标签页 -->
+            <action id="ReadBook.OpenSettings" 
+                    class="com.github.xucux.read.action.OpenSettingsAction"
+                    text="设置"
+                    description="打开设置标签页">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 4"/>
+            </action>
+            
+            <!-- 添加书籍 -->
+            <action id="ReadBook.AddBook" 
+                    class="com.github.xucux.read.action.AddBookAction"
+                    text="添加书籍"
+                    description="添加新的小说文件">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt A"/>
+            </action>
+            
+            <!-- 重新解析章节 -->
+            <action id="ReadBook.ReparseBook" 
+                    class="com.github.xucux.read.action.ReparseBookAction"
+                    text="重新解析章节"
+                    description="重新解析选中书籍的章节结构">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt P"/>
+            </action>
+            
+            <!-- 字体设置 -->
+            <action id="ReadBook.FontSettings" 
+                    class="com.github.xucux.read.action.FontSettingsAction"
+                    text="字体设置"
+                    description="设置阅读器字体和显示效果">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F"/>
+            </action>
+            
+            <!-- 关闭HelloRead -->
+            <action id="ReadBook.CloseHelloRead" 
+                    class="com.github.xucux.read.action.CloseHelloReadAction"
+                    text="关闭HelloRead"
+                    description="快速关闭HelloRead工具窗口">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt NUMPAD0"/>
+            </action>
+            
+            <!-- 查看章节列表 -->
+            <action id="ReadBook.ViewChapters" 
+                    class="com.github.xucux.read.action.ViewChaptersAction"
+                    text="查看章节列表"
+                    description="查看选中书籍的章节列表">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt C"/>
+            </action>
+            
+            <!-- 切换书籍详情显示 -->
+            <action id="ReadBook.ToggleBookDetails" 
+                    class="com.github.xucux.read.action.ToggleBookDetailsAction"
+                    text="切换书籍详情"
+                    description="显示或隐藏书籍标题和操作按钮">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt T"/>
+            </action>
+            
+            <!-- 上一章快捷键 -->
+            <action id="ReadBook.PreviousChapter" 
+                    class="com.github.xucux.read.action.PreviousChapterAction"
+                    text="上一章"
+                    description="跳转到上一章">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD4"/>
+            </action>
+            
+            <!-- 下一章快捷键 -->
+            <action id="ReadBook.NextChapter" 
+                    class="com.github.xucux.read.action.NextChapterAction"
+                    text="下一章"
+                    description="跳转到下一章">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD6"/>
+            </action>
+            
+            <!-- 向上滚动快捷键 -->
+            <action id="ReadBook.ScrollUp" 
+                    class="com.github.xucux.read.action.ScrollUpAction"
+                    text="向上滚动/上一行"
+                    description="在阅读器中向上滚动">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD8"/>
+            </action>
+            
+            <!-- 向下滚动快捷键 -->
+            <action id="ReadBook.ScrollDown" 
+                    class="com.github.xucux.read.action.ScrollDownAction"
+                    text="向下滚动/下一行"
+                    description="在阅读器中向下滚动">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD2"/>
+            </action>
+        </group>
+    </actions>
+</idea-plugin>
