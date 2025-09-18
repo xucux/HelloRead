@@ -14,17 +14,21 @@ data class Book(
     val totalLines: Int = 0,           // 总行数
     val currentChapterIndex: Int = 0,  // 当前阅读章节索引
     val currentChapterTitle: String = "", // 当前章节标题
+    val currentChapterOriginalTitle: String = "", // 当前阅读原始章节标题
     val lastReadTime: Long = System.currentTimeMillis(), // 最后阅读时间
     val addTime: Long = System.currentTimeMillis()       // 添加时间
 ) {
     /**
      * 获取显示用的章节信息
+     * 优先展示原始章节标题，如果没有则使用当前章节标题
      */
     fun getDisplayChapterInfo(): String {
-        return if (currentChapterTitle.isNotEmpty()) {
-            "第${currentChapterIndex + 1}章 $currentChapterTitle"
+        return if (currentChapterOriginalTitle.isNotEmpty()) {
+            currentChapterOriginalTitle
+        } else if (currentChapterTitle.isNotEmpty()) {
+            "第${currentChapterIndex}章 $currentChapterTitle"
         } else {
-            "第${currentChapterIndex + 1}章"
+            "第${currentChapterIndex}章"
         }
     }
     

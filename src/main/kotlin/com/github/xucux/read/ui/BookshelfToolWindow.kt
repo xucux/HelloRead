@@ -273,7 +273,8 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
                 totalChapters = newChapters.size,
                 totalLines = totalLines,
                 currentChapterIndex = 0, // 重置到第一章
-                currentChapterTitle = newChapters.firstOrNull()?.title ?: ""
+                currentChapterTitle = newChapters.firstOrNull()?.title ?: "",
+                currentChapterOriginalTitle = newChapters.firstOrNull()?.originalTitle ?: ""
             )
 
             // 保存更新后的书籍信息
@@ -353,5 +354,13 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
         toolbar.isVisible = isBookDetailsVisible
         revalidate()
         repaint()
+    }
+
+    /**
+     * 当书架窗口显示时调用此方法
+     * 这个方法会在ContentManagerListener中被调用
+     */
+    fun onWindowShown() {
+        loadBooks()
     }
 }

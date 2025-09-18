@@ -120,7 +120,8 @@ class ReparseBookAction : AnAction(), DumbAware {
                 totalChapters = newChapters.size,
                 totalLines = totalLines,
                 currentChapterIndex = 0, // 重置到第一章
-                currentChapterTitle = newChapters.firstOrNull()?.title ?: ""
+                currentChapterTitle = newChapters.firstOrNull()?.title ?: "",
+                currentChapterOriginalTitle = newChapters.firstOrNull()?.originalTitle ?: ""
             )
             
             // 保存更新后的书籍信息

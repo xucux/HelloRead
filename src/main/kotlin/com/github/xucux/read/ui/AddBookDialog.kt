@@ -152,6 +152,7 @@ class AddBookDialog(project: Project) : DialogWrapper(project) {
                 totalLines = totalLines,
                 currentChapterIndex = 0,
                 currentChapterTitle = chapters.firstOrNull()?.title ?: "",
+                currentChapterOriginalTitle = chapters.firstOrNull()?.originalTitle ?: "",
                 lastReadTime = System.currentTimeMillis(),
                 addTime = System.currentTimeMillis()
             )

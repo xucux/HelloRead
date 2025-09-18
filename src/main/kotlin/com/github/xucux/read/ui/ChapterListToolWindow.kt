@@ -257,6 +257,7 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
             book.copy(
                 currentChapterIndex = selectedIndex,
                 currentChapterTitle = chapters[selectedIndex].title,
+                currentChapterOriginalTitle = chapters[selectedIndex].originalTitle,
                 lastReadTime = System.currentTimeMillis()
             )
         } else {

@@ -88,6 +88,7 @@ class ViewChaptersAction : AnAction(), DumbAware {
                         val updatedBook = book.copy(
                             currentChapterIndex = dialog.getSelectedChapterIndex(),
                             currentChapterTitle = selectedChapter.title,
+                            currentChapterOriginalTitle = selectedChapter.originalTitle,
                             lastReadTime = System.currentTimeMillis()
                         )
                         dataStorageService.saveBook(updatedBook)

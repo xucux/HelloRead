@@ -63,6 +63,7 @@ class DataStorageService {
             properties.setProperty("${prefix}totalLines", book.totalLines.toString())
             properties.setProperty("${prefix}currentChapterIndex", book.currentChapterIndex.toString())
             properties.setProperty("${prefix}currentChapterTitle", book.currentChapterTitle)
+            properties.setProperty("${prefix}currentChapterOriginalTitle", book.currentChapterOriginalTitle)
             properties.setProperty("${prefix}lastReadTime", book.lastReadTime.toString())
             properties.setProperty("${prefix}addTime", book.addTime.toString())
             
@@ -104,6 +105,7 @@ class DataStorageService {
                     totalLines = properties.getProperty("${prefix}totalLines")?.toIntOrNull() ?: 0,
                     currentChapterIndex = properties.getProperty("${prefix}currentChapterIndex")?.toIntOrNull() ?: 0,
                     currentChapterTitle = properties.getProperty("${prefix}currentChapterTitle") ?: "",
+                    currentChapterOriginalTitle = properties.getProperty("${prefix}currentChapterOriginalTitle") ?: "",
                     lastReadTime = properties.getProperty("${prefix}lastReadTime")?.toLongOrNull() ?: System.currentTimeMillis(),
                     addTime = properties.getProperty("${prefix}addTime")?.toLongOrNull() ?: System.currentTimeMillis()
                 )

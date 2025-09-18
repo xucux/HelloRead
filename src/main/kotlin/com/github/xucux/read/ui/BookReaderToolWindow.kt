@@ -373,6 +373,8 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
             if (currentChapterIndex > 0) {
                 currentChapterIndex--
                 loadCurrentChapter()
+                // 保存阅读记录
+                saveReadingRecord()
             }
         }
         
@@ -380,6 +382,8 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
             if (currentChapterIndex < chapters.size - 1) {
                 currentChapterIndex++
                 loadCurrentChapter()
+                // 保存阅读记录
+                saveReadingRecord()
             }
         }
         
@@ -768,6 +772,7 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
         val updatedBook = book.copy(
             currentChapterIndex = currentChapterIndex,
             currentChapterTitle = chapter.title,
+            currentChapterOriginalTitle = chapter.originalTitle,
             lastReadTime = System.currentTimeMillis()
         )
         dataStorageService.saveBook(updatedBook)
@@ -1013,6 +1018,8 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
                 ReadingMode.SCROLL_MODE -> loadCurrentChapterForScrollMode()
                 ReadingMode.STATUS_BAR_MODE -> startStatusBarReading()
             }
+            // 保存阅读记录
+            saveReadingRecord()
         }
     }
     
@@ -1027,6 +1034,8 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
                 ReadingMode.SCROLL_MODE -> loadCurrentChapterForScrollMode()
                 ReadingMode.STATUS_BAR_MODE -> startStatusBarReading()
             }
+            // 保存阅读记录
+            saveReadingRecord()
         }
     }
     

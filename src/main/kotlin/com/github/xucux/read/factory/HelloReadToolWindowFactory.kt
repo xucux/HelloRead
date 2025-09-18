@@ -9,6 +9,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManagerListener
+import com.intellij.ui.content.ContentManagerEvent
 
 /**
  * HelloRead 主工具窗口工厂
@@ -28,6 +30,16 @@ class HelloReadToolWindowFactory : ToolWindowFactory {
         val bookReaderContent = ContentFactory.getInstance().createContent(bookReaderToolWindow, TabConstants.READER_TAB, false)
         val chapterListContent = ContentFactory.getInstance().createContent(chapterListWindow, TabConstants.CHAPTER_LIST_TAB, false)
         val settingsContent = ContentFactory.getInstance().createContent(settingWindows, TabConstants.SETTINGS_TAB, false)
+        
+        // 添加ContentManagerListener来监听内容选择事件
+        toolWindow.contentManager.addContentManagerListener(object : ContentManagerListener {
+            override fun selectionChanged(event: ContentManagerEvent) {
+                // 当选择的内容是书架标签页时，触发onWindowShown()
+                if (event.content == bookshelfContent) {
+                    bookshelfToolWindow.onWindowShown()
+                }
+            }
+        })
         
         // 添加到工具窗口
         toolWindow.contentManager.addContent(bookshelfContent)
