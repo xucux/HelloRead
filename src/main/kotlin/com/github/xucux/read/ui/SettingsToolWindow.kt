@@ -6,7 +6,6 @@ import com.github.xucux.read.model.FontSettings
 import com.github.xucux.read.service.DisplaySettingsService
 import com.github.xucux.read.service.FontSettingsService
 import com.github.xucux.read.service.notify.ReaderNotificationService
-import com.ibm.icu.text.CaseMap.Title
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.SimpleToolWindowPanel
@@ -16,8 +15,8 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
 import com.intellij.ui.ColorChooser
+import com.intellij.ui.JBColor
 import java.awt.Color
-import kotlinx.html.B
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.Font
@@ -215,10 +214,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         previewArea.maximumSize = java.awt.Dimension(300, 150)
         
         val scrollPane = JBScrollPane(previewArea)
-        scrollPane.border = JBUI.Borders.compound(
-            JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
-            JBUI.Borders.empty(5)
-        )
+        scrollPane.border = JBUI.Borders.customLine(JBColor.GRAY)
         // 设置滚动面板的固定高度
         scrollPane.preferredSize = java.awt.Dimension(310, 160)
         scrollPane.minimumSize = java.awt.Dimension(310, 160)
@@ -339,10 +335,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         val colorSelectionPanel = JPanel(FlowLayout())
         backgroundColorPreview = JLabel("  ")
         backgroundColorPreview.background = Color.WHITE
-        backgroundColorPreview.border = JBUI.Borders.compound(
-            JBUI.Borders.customLine(Color.GRAY),
-            JBUI.Borders.empty(2)
-        )
+        backgroundColorPreview.border = JBUI.Borders.customLine(JBColor.GRAY)
         backgroundColorPreview.preferredSize = java.awt.Dimension(30, 20)
         backgroundColorPreview.isOpaque = true
         colorSelectionPanel.add(backgroundColorPreview, BorderLayout.WEST)

@@ -220,13 +220,13 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
      * 过滤章节
      */
     private fun filterChapters() {
-        val searchText = searchField.text.trim().lowercase(Locale.getDefault())
+        val searchText = searchField.text.trim().toLowerCase()
         
         if (searchText.isEmpty()) {
             filteredChapterTitles = allChapterTitles
         } else {
             filteredChapterTitles = allChapterTitles.filter { 
-                it.lowercase(Locale.getDefault()).contains(searchText) 
+                it.toLowerCase().contains(searchText) 
             }
         }
         

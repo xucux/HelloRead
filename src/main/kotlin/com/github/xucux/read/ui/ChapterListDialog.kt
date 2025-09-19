@@ -132,13 +132,13 @@ class ChapterListDialog(
      * 过滤章节列表
      */
     private fun filterChapters() {
-        val searchText = searchField.text.trim().lowercase(Locale.getDefault())
+        val searchText = searchField.text.trim().toLowerCase(Locale.getDefault())
         
         if (searchText.isEmpty()) {
             filteredChapterTitles = allChapterTitles
         } else {
             filteredChapterTitles = allChapterTitles.filter { title ->
-                title.lowercase(Locale.getDefault()).contains(searchText)
+                title.toLowerCase(Locale.getDefault()).contains(searchText)
             }
         }
         

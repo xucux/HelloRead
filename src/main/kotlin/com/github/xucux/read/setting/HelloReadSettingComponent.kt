@@ -24,6 +24,7 @@ import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import javax.swing.*
+import javax.swing.border.Border
 import javax.swing.border.TitledBorder
 import javax.swing.text.*
 
@@ -234,10 +235,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
         val colorSelectionPanel = JPanel(FlowLayout())
         backgroundColorPreview.text = "  "
         backgroundColorPreview.background = Color.WHITE
-        backgroundColorPreview.border = JBUI.Borders.compound(
-            JBUI.Borders.customLine(Color.GRAY),
-            JBUI.Borders.empty(2)
-        )
+        backgroundColorPreview.border = JBUI.Borders.customLine(JBColor.GRAY)
         backgroundColorPreview.preferredSize = java.awt.Dimension(30, 20)
         backgroundColorPreview.isOpaque = true
         colorSelectionPanel.add(backgroundColorPreview)
@@ -299,10 +297,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
         
         // 预览区域
         val scrollPane = JBScrollPane(previewArea)
-        scrollPane.border = JBUI.Borders.compound(
-            JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
-            JBUI.Borders.empty(5)
-        )
+        scrollPane.border = JBUI.Borders.customLine(JBColor.GRAY)
         // 设置滚动面板的固定高度，防止编辑时被撑开
         previewArea.preferredSize = java.awt.Dimension( 450,160)
         previewArea.minimumSize = java.awt.Dimension(300, 160)
