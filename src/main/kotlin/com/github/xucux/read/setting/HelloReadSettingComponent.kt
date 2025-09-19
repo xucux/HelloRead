@@ -68,6 +68,12 @@ class HelloReadSettingComponent : SearchableConfigurable {
     private var currentDisplaySettings: DisplaySettings = displaySettingsService.loadDisplaySettings()
     private var originalDisplaySettings: DisplaySettings = currentDisplaySettings
     
+    private val previewText: String = "这是字体预览文本。\n\n" +
+                "在这里可以看到字体设置的效果。\n" +
+                "包括字体族、字体大小、行间距和段落间距。\n\n" +
+                "支持中文和英文混合显示。\n" +
+                "The quick brown fox jumps over the lazy dog."
+
     override fun createComponent(): JComponent? {
         val mainPanel = JPanel()
         mainPanel.layout = GridBagLayout()
@@ -340,11 +346,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
         
         // 设置预览区域
         previewArea.isEditable = false
-        previewArea.text = "这是字体预览文本。\n\n" +
-                "在这里可以看到字体设置的效果。\n" +
-                "包括字体族、字体大小、行间距和段落间距。\n\n" +
-                "支持中文和英文混合显示。\n" +
-                "The quick brown fox jumps over the lazy dog."
+        previewArea.text = previewText
         previewArea.border = JBUI.Borders.empty(10)
         
         // 设置预览区域的固定高度，防止编辑时被撑开
