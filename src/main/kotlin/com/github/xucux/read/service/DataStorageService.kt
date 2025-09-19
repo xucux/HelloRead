@@ -58,6 +58,7 @@ class DataStorageService {
             val prefix = "${StorageConstants.BOOK_PREFIX}${book.id}."
             
             properties.setProperty("${prefix}title", book.title)
+            properties.setProperty("${prefix}author", book.author)
             properties.setProperty("${prefix}filePath", book.filePath)
             properties.setProperty("${prefix}totalChapters", book.totalChapters.toString())
             properties.setProperty("${prefix}totalLines", book.totalLines.toString())
@@ -99,6 +100,7 @@ class DataStorageService {
                 val book = Book(
                     id = bookId,
                     title = title,
+                    author = properties.getProperty("${prefix}author") ?: "",
                     filePath = filePath,
                     file = file,
                     totalChapters = properties.getProperty("${prefix}totalChapters")?.toIntOrNull() ?: 0,

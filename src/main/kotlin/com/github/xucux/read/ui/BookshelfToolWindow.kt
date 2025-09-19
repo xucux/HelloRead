@@ -39,7 +39,7 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
         add(toolbar, BorderLayout.NORTH)
 
         // 创建表格模型
-        val columnNames = arrayOf("书名", "当前章节", "进度", "最后阅读")
+        val columnNames = arrayOf("书名", "作者", "当前章节", "进度", "最后阅读")
         tableModel = object : DefaultTableModel(columnNames, 0) {
             override fun isCellEditable(row: Int, column: Int): Boolean = false
         }
@@ -159,8 +159,8 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
         val columnWidths = dataStorageService.loadColumnWidths()
 
         // 设置各列的默认宽度
-        val defaultWidths = intArrayOf(200, 250, 80, 120)
-        val columnNames = arrayOf("书名", "当前章节", "进度", "最后阅读")
+        val defaultWidths = intArrayOf(200, 120, 250, 80, 120)
+        val columnNames = arrayOf("书名", "作者", "当前章节", "进度", "最后阅读")
 
         for (i in 0 until columnModel.columnCount) {
             val column = columnModel.getColumn(i)
@@ -175,7 +175,7 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
      */
     private fun saveColumnWidths() {
         val columnModel = bookTable.columnModel
-        val columnNames = arrayOf("书名", "当前章节", "进度", "最后阅读")
+        val columnNames = arrayOf("书名", "作者", "当前章节", "进度", "最后阅读")
         val columnWidths = mutableMapOf<String, Int>()
 
         for (i in 0 until columnModel.columnCount) {
@@ -200,6 +200,7 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
         for (book in books) {
             val rowData = arrayOf(
                 book.title,
+                book.author.ifEmpty { "未知" },
                 book.getDisplayChapterInfo(),
                 "${(book.getReadingProgress() * 100).toInt()}%",
                 formatLastReadTime(book.lastReadTime)
