@@ -122,7 +122,7 @@ class AddBookDialog(project: Project) : DialogWrapper(project) {
      */
     private fun updateConvertButtonState() {
         val file = selectedFile
-        if (file != null && file.exists() && file.extension.lowercase(Locale.getDefault()) == "txt") {
+        if (file != null && file.exists() && file.extension.toLowerCase(Locale.getDefault()) == "txt") {
             // 检查文件是否已经是UTF-8编码
             val fileEncoding = detectFileEncoding(file)
             convertButton.isEnabled = !isUtf8File(file)
