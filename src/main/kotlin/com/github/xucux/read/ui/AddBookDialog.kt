@@ -13,7 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
-import org.slf4j.LoggerFactory
+import com.intellij.openapi.diagnostic.logger
 import java.awt.Dimension
 import java.io.File
 import java.util.*
@@ -27,7 +27,7 @@ import javax.swing.JPanel
 class AddBookDialog(project: Project) : DialogWrapper(project) {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(AddBookDialog::class.java)
+        private val logger = logger<AddBookDialog>()
     }
     
     private val dataStorageService = DataStorageService.getInstance()

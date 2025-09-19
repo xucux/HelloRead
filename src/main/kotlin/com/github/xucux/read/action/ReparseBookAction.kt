@@ -8,7 +8,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.ui.Messages
-import org.slf4j.LoggerFactory
+import com.intellij.openapi.diagnostic.logger
 
 /**
  * 重新解析章节动作
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 class ReparseBookAction : AnAction(), DumbAware {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(ReparseBookAction::class.java)
+        private val logger = logger<ReparseBookAction>()
     }
     
     override fun actionPerformed(e: AnActionEvent) {

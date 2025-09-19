@@ -27,16 +27,12 @@ repositories {
 }
 
 dependencies {
-    // 日志依赖
-    implementation("org.slf4j:slf4j-api:2.0.9")
-    implementation("ch.qos.logback:logback-classic:1.4.11")
-    implementation("ch.qos.logback:logback-core:1.4.11")
-    // Kotlin 标准库扩展
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
-    // HTML 处理
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1")
-    // ICU4J 用于文本处理
-    implementation("com.ibm.icu:icu4j:72.1")
+//    // Kotlin 标准库扩展
+//    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
+//    // HTML 处理
+//    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1")
+//    // ICU4J 用于文本处理
+//    implementation("com.ibm.icu:icu4j:72.1")
 }
 
 // Configure Gradle IntelliJ Plugin

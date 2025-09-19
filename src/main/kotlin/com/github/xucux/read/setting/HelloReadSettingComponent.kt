@@ -411,7 +411,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
             val fontFamily = fontFamilyCombo.selectedItem as? String ?: currentFontSettings.fontFamily
             val fontSize = (fontSizeCombo.selectedItem as? String)?.toIntOrNull() ?: currentFontSettings.fontSize
             val lineSpacing = lineSpacingField.text.toFloatOrNull() ?: currentFontSettings.lineSpacing
-            val paragraphSpacing = paragraphSpacingField.text.toIntOrNull() ?: currentFontSettings.paragraphSpacing
+//            val paragraphSpacing = paragraphSpacingField.text.toIntOrNull() ?: currentFontSettings.paragraphSpacing
             
             // 应用字体设置到预览区域
             previewArea.font = Font(fontFamily, Font.PLAIN, fontSize)

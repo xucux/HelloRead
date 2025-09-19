@@ -6,7 +6,7 @@ import com.github.xucux.read.service.StatusBarReadingService
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
-import org.slf4j.LoggerFactory
+import com.intellij.openapi.diagnostic.logger
 
 /**
  * 向下滚动快捷键动作
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 class ScrollDownAction : AnAction(), DumbAware {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(ScrollDownAction::class.java)
+        private val logger = logger<ScrollDownAction>()
         private val statusBarReadingService = StatusBarReadingService.getInstance()
     }
     

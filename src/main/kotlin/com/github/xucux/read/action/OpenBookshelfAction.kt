@@ -4,7 +4,7 @@ import com.github.xucux.read.constants.TabConstants
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
-import org.slf4j.LoggerFactory
+import com.intellij.openapi.diagnostic.logger
 
 /**
  * 打开我的书架动作
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 class OpenBookshelfAction : AnAction(), DumbAware {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(OpenBookshelfAction::class.java)
+        private val logger = logger<OpenBookshelfAction>()
     }
     
     override fun actionPerformed(e: AnActionEvent) {
