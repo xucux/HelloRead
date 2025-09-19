@@ -8,6 +8,7 @@ import java.io.File
 data class Book(
     val id: String,                    // 书籍唯一标识
     val title: String,                 // 书籍标题
+    val author: String = "",           // 作者
     val filePath: String,              // 文件路径
     val file: File,                    // 文件对象
     val totalChapters: Int = 0,        // 总章节数

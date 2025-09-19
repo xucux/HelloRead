@@ -6,10 +6,12 @@
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
     <name>HelloRead</name>
-    <version>1.0.1-201</version>
+    <version>1.0.2-201</version>
     <idea-version since-build="201.6668.113" until-build="223.*"/>
     <change-notes>
         <![CDATA[
+    <p>1.0.2</p>
+    <p>- Add FileEncoding Conversion</p>
     <p>1.0.1</p>
     <p>- Add Color Settings</p>
     <p>1.0.0</p>
