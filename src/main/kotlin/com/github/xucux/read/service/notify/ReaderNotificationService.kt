@@ -37,7 +37,8 @@ class ReaderNotificationService(private val project: Project) {
     fun notifyReaderUpdateDisplay(
         hideOperationPanel: Boolean,
         hideTitleButton: Boolean,
-        hideProgressLabel: Boolean
+        hideProgressLabel: Boolean,
+        backgroundColor: String = ""
     ) {
         try {
             val toolWindowManager = com.intellij.openapi.wm.ToolWindowManager.getInstance(project)
@@ -51,7 +52,8 @@ class ReaderNotificationService(private val project: Project) {
                     readerComponent?.updateDisplaySettings(
                         hideOperationPanel,
                         hideTitleButton,
-                        hideProgressLabel
+                        hideProgressLabel,
+                        backgroundColor
                     )
                 }
             }

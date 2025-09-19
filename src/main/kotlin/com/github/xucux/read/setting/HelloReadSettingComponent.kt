@@ -14,7 +14,12 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
+import com.intellij.ui.ColorChooser
+import com.intellij.ui.JBColor
+import com.intellij.ui.components.JBScrollPane
+import java.awt.Color
 import java.awt.BorderLayout
+import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -41,6 +46,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
     private val lineSpacingField = JBTextField()
     private val paragraphSpacingField = JBTextField()
     private val previewArea = JTextPane()
+    private val editPreviewCheckBox = JBCheckBox("启用预览编辑")
     
     // 界面显示选项UI组件
     private val hideOperationPanelCheckBox = JBCheckBox("隐藏阅读界面的操作面板")
@@ -49,6 +55,12 @@ class HelloReadSettingComponent : SearchableConfigurable {
     private val autoSaveProgressCheckBox = JBCheckBox("自动保存阅读进度")
     private val statusBarAutoScrollCheckBox = JBCheckBox("底部状态栏自动滚动")
     private val statusBarScrollIntervalField = JBTextField()
+    
+    // 背景颜色设置UI组件
+    private val backgroundColorButton = JButton("选择颜色")
+    private val backgroundColorPreview = JLabel()
+    private val presetColorButton1 = JButton("深色")
+    private val presetColorButton2 = JButton("浅色")
     
     // 当前设置
     private var currentFontSettings: FontSettings = fontSettingsService.loadFontSettings()
@@ -69,32 +81,34 @@ class HelloReadSettingComponent : SearchableConfigurable {
         gbc.fill = GridBagConstraints.HORIZONTAL
         gbc.anchor = GridBagConstraints.NORTH
         gbc.weightx = 1.0
-        gbc.insets = JBUI.insets(10, 10, 10, 10)
+//        gbc.insets = JBUI.insets(10, 10, 10, 10)
         mainPanel.add(fontSettingsPanel, gbc)
-        
-        // 界面显示选项面板
-        val displayOptionsPanel = createDisplayOptionsPanel()
-        gbc.gridx = 0
-        gbc.gridy = 1
-        gbc.fill = GridBagConstraints.HORIZONTAL
-        gbc.anchor = GridBagConstraints.NORTH
-        gbc.weightx = 1.0
-        gbc.insets = JBUI.insets(10, 10, 10, 10)
-        mainPanel.add(displayOptionsPanel, gbc)
-        
+
         // 预览面板
         val previewPanel = createPreviewPanel()
         gbc.gridx = 0
-        gbc.gridy = 2
+        gbc.gridy = 1
         gbc.fill = GridBagConstraints.BOTH
         gbc.anchor = GridBagConstraints.NORTH
         gbc.weightx = 1.0
         gbc.weighty = 1.0
-        gbc.insets = JBUI.insets(10, 10, 10, 10)
+//        gbc.insets = JBUI.insets(10, 10, 10, 10)
         mainPanel.add(previewPanel, gbc)
         
+        // 界面显示选项面板
+        val displayOptionsPanel = createDisplayOptionsPanel()
+        gbc.gridx = 0
+        gbc.gridy = 2
+        gbc.fill = GridBagConstraints.HORIZONTAL
+        gbc.anchor = GridBagConstraints.NORTH
+        gbc.weightx = 1.0
+//        gbc.insets = JBUI.insets(10, 10, 10, 10)
+        mainPanel.add(displayOptionsPanel, gbc)
+        
+
+        
         // 添加滚动面板
-        val scrollPane = JScrollPane(mainPanel)
+        val scrollPane = JBScrollPane(mainPanel)
         scrollPane.border = JBUI.Borders.empty()
         
         // 初始化设置
@@ -123,7 +137,6 @@ class HelloReadSettingComponent : SearchableConfigurable {
         // 字体族设置
         val fontFamilyPanel = JPanel(BorderLayout())
         val fontFamilyLabel = JBLabel("字体族:")
-//        fontFamilyLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         fontFamilyPanel.add(fontFamilyLabel, BorderLayout.WEST)
         fontFamilyPanel.add(fontFamilyCombo, BorderLayout.CENTER)
         settingsPanel.add(fontFamilyPanel)
@@ -132,7 +145,6 @@ class HelloReadSettingComponent : SearchableConfigurable {
         // 字体大小设置
         val fontSizePanel = JPanel(BorderLayout())
         val fontSizeLabel = JBLabel("字体大小:")
-//        fontSizeLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         fontSizePanel.add(fontSizeLabel, BorderLayout.WEST)
         fontSizePanel.add(fontSizeCombo, BorderLayout.CENTER)
         settingsPanel.add(fontSizePanel)
@@ -141,7 +153,6 @@ class HelloReadSettingComponent : SearchableConfigurable {
         // 行间距设置
         val lineSpacingPanel = JPanel(BorderLayout())
         val lineSpacingLabel = JBLabel("行间距:")
-//        lineSpacingLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         lineSpacingPanel.add(lineSpacingLabel, BorderLayout.WEST)
         lineSpacingPanel.add(lineSpacingField, BorderLayout.CENTER)
         settingsPanel.add(lineSpacingPanel)
@@ -150,7 +161,6 @@ class HelloReadSettingComponent : SearchableConfigurable {
         // 段落间距设置
         val paragraphSpacingPanel = JPanel(BorderLayout())
         val paragraphSpacingLabel = JBLabel("段落间距:")
-//        paragraphSpacingLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         paragraphSpacingPanel.add(paragraphSpacingLabel, BorderLayout.WEST)
         paragraphSpacingPanel.add(paragraphSpacingField, BorderLayout.CENTER)
         settingsPanel.add(paragraphSpacingPanel)
@@ -174,36 +184,90 @@ class HelloReadSettingComponent : SearchableConfigurable {
             JBUI.Borders.empty(10)
         ), "界面显示选项")
         
-        // 设置复选框字体
-//        val checkboxFont = Font( Font.PLAIN, 12)
-//        hideOperationPanelCheckBox.font = checkboxFont
-//        hideTitleButtonCheckBox.font = checkboxFont
-//        hideProgressLabelCheckBox.font = checkboxFont
-//        autoSaveProgressCheckBox.font = checkboxFont
+        // 复选框使用默认字体
         
-        // 创建复选框容器面板，使用垂直布局
+        // 创建复选框容器面板，使用GridBagLayout确保左对齐
         val checkboxPanel = JPanel()
-        checkboxPanel.layout = BoxLayout(checkboxPanel, BoxLayout.Y_AXIS)
+        checkboxPanel.layout = GridBagLayout()
+        val gbc = GridBagConstraints()
         
         // 添加复选框到容器面板
-        checkboxPanel.add(hideOperationPanelCheckBox)
-        checkboxPanel.add(Box.createVerticalStrut(5)) // 添加间距
-        checkboxPanel.add(hideTitleButtonCheckBox)
-        checkboxPanel.add(Box.createVerticalStrut(5)) // 添加间距
-        checkboxPanel.add(hideProgressLabelCheckBox)
-        checkboxPanel.add(Box.createVerticalStrut(5)) // 添加间距
-        checkboxPanel.add(autoSaveProgressCheckBox)
-        checkboxPanel.add(Box.createVerticalStrut(5)) // 添加间距
-        checkboxPanel.add(statusBarAutoScrollCheckBox)
+        gbc.gridx = 0
+        gbc.gridy = 0
+        gbc.anchor = GridBagConstraints.WEST
+        gbc.insets = JBUI.insets(5, 0, 5, 0)
+        checkboxPanel.add(hideOperationPanelCheckBox, gbc)
+        
+        gbc.gridy = 1
+        checkboxPanel.add(hideTitleButtonCheckBox, gbc)
+        
+        gbc.gridy = 2
+        checkboxPanel.add(hideProgressLabelCheckBox, gbc)
+        
+        gbc.gridy = 3
+        checkboxPanel.add(autoSaveProgressCheckBox, gbc)
+        
+        gbc.gridy = 4
+        checkboxPanel.add(statusBarAutoScrollCheckBox, gbc)
         
         // 添加滚动间隔设置
-        val intervalPanel = JPanel(BorderLayout())
+        gbc.gridy = 5
+        gbc.insets = JBUI.insets(5, 0, 5, 0)
         val intervalLabel = JBLabel("滚动间隔(毫秒):")
-        intervalLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
-        intervalPanel.add(intervalLabel, BorderLayout.WEST)
+        checkboxPanel.add(intervalLabel, gbc)
+        
+        gbc.gridx = 1
+        gbc.insets = JBUI.insets(5, 10, 5, 0)
         statusBarScrollIntervalField.toolTipText = "底部状态栏自动滚动的间隔时间，单位毫秒"
-        intervalPanel.add(statusBarScrollIntervalField, BorderLayout.CENTER)
-        checkboxPanel.add(intervalPanel)
+        checkboxPanel.add(statusBarScrollIntervalField, gbc)
+        
+        // 添加背景颜色设置
+        gbc.gridx = 0
+        gbc.gridy = 6
+        gbc.insets = JBUI.insets(5, 0, 5, 0)
+        val backgroundColorLabel = JBLabel("阅读器背景颜色:")
+        checkboxPanel.add(backgroundColorLabel, gbc)
+        
+        // 颜色预览和选择按钮面板
+        gbc.gridx = 1
+        gbc.insets = JBUI.insets(5, 10, 5, 0)
+        val colorSelectionPanel = JPanel(FlowLayout())
+        backgroundColorPreview.text = "  "
+        backgroundColorPreview.background = Color.WHITE
+        backgroundColorPreview.border = JBUI.Borders.compound(
+            JBUI.Borders.customLine(Color.GRAY),
+            JBUI.Borders.empty(2)
+        )
+        backgroundColorPreview.preferredSize = java.awt.Dimension(30, 20)
+        backgroundColorPreview.isOpaque = true
+        colorSelectionPanel.add(backgroundColorPreview)
+        colorSelectionPanel.add(backgroundColorButton)
+        
+        // 预设颜色按钮
+        val presetColorPanel = JPanel()
+        presetColorPanel.layout = BoxLayout(presetColorPanel, BoxLayout.X_AXIS)
+        
+        presetColorButton1.background = Color.decode("#2B2B2B")
+        presetColorButton1.isBorderPainted = false
+//        presetColorButton1.isOpaque = true
+        presetColorButton1.foreground = Color.decode("#2B2B2B")
+        presetColorButton1.preferredSize = java.awt.Dimension(50, 25)
+        presetColorButton1.toolTipText = "深色背景 (#2B2B2B)"
+        
+        presetColorButton2.background = Color.decode("#FFFFFF")
+        presetColorButton2.isBorderPainted = false
+        presetColorButton2.isOpaque = true
+        presetColorButton2.preferredSize = java.awt.Dimension(50, 25)
+        presetColorButton2.toolTipText = "浅色背景 (#FFFFFF)"
+        
+        presetColorPanel.add(Box.createHorizontalStrut(5))
+        presetColorPanel.add(presetColorButton1)
+        presetColorPanel.add(Box.createHorizontalStrut(5))
+        presetColorPanel.add(presetColorButton2)
+
+        colorSelectionPanel.add( JLabel("预设："))
+        colorSelectionPanel.add(presetColorPanel)
+        checkboxPanel.add(colorSelectionPanel, gbc)
         
         // 将复选框面板添加到主面板的中央
         panel.add(checkboxPanel, BorderLayout.CENTER)
@@ -225,25 +289,39 @@ class HelloReadSettingComponent : SearchableConfigurable {
             JBUI.Borders.empty(10)
         ), "预览")
         
-        // 预览标签
-        val previewLabel = JBLabel("字体效果预览:")
-//        previewLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
+        // 预览标签和编辑选项
+        val previewHeaderPanel = JPanel(BorderLayout())
+        previewHeaderPanel.add(editPreviewCheckBox, BorderLayout.EAST)
+        
         gbc.gridx = 0
         gbc.gridy = 0
         gbc.gridwidth = 1
         gbc.anchor = GridBagConstraints.WEST
         gbc.insets = JBUI.insets(5, 0, 5, 0)
-        panel.add(previewLabel, gbc)
+        panel.add(previewHeaderPanel, gbc)
         
         // 预览区域
-        val scrollPane = JScrollPane(previewArea)
-        scrollPane.border = JBUI.Borders.empty(5)
+        val scrollPane = JBScrollPane(previewArea)
+        scrollPane.border = JBUI.Borders.compound(
+            JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
+            JBUI.Borders.empty(5)
+        )
+        // 设置滚动面板的固定高度，防止编辑时被撑开
+        previewArea.preferredSize = java.awt.Dimension( 450,160)
+        previewArea.minimumSize = java.awt.Dimension(300, 160)
+        previewArea.maximumSize = java.awt.Dimension(450, 160)
+        // 设置滚动面板的固定高度
+        scrollPane.preferredSize = java.awt.Dimension(460, 170)
+        scrollPane.minimumSize = java.awt.Dimension(310, 170)
+        scrollPane.maximumSize = java.awt.Dimension(460, 170)
+
         gbc.gridx = 0
         gbc.gridy = 1
         gbc.gridwidth = 1
-        gbc.fill = GridBagConstraints.BOTH
-        gbc.weightx = 1.0
-        gbc.weighty = 1.0
+        gbc.fill = GridBagConstraints.NONE  // 改为NONE，使用固定尺寸
+        gbc.anchor = GridBagConstraints.CENTER
+        gbc.weightx = 0.0
+        gbc.weighty = 0.0
         gbc.insets = JBUI.insets(5, 0, 0, 0)
         panel.add(scrollPane, gbc)
         
@@ -269,6 +347,14 @@ class HelloReadSettingComponent : SearchableConfigurable {
                 "The quick brown fox jumps over the lazy dog."
         previewArea.border = JBUI.Borders.empty(10)
         
+        // 设置预览区域的固定高度，防止编辑时被撑开
+        previewArea.preferredSize = java.awt.Dimension(450, 200)
+        previewArea.minimumSize = java.awt.Dimension(300, 200)
+        previewArea.maximumSize = java.awt.Dimension(450, 200)
+        
+        // 设置编辑模式复选框
+        editPreviewCheckBox.toolTipText = "勾选后可以在预览区域编辑文本"
+        
         // 加载当前字体设置值
         fontFamilyCombo.selectedItem = currentFontSettings.fontFamily
         fontSizeCombo.selectedItem = currentFontSettings.fontSize.toString()
@@ -283,11 +369,17 @@ class HelloReadSettingComponent : SearchableConfigurable {
         statusBarAutoScrollCheckBox.isSelected = currentDisplaySettings.statusBarAutoScroll
         statusBarScrollIntervalField.text = currentDisplaySettings.statusBarScrollInterval.toString()
         
+        // 加载背景颜色设置
+        loadBackgroundColorSettings()
+        
         // 添加字体设置事件监听器
         fontFamilyCombo.addActionListener { updatePreview() }
         fontSizeCombo.addActionListener { updatePreview() }
         lineSpacingField.addActionListener { updatePreview() }
         paragraphSpacingField.addActionListener { updatePreview() }
+        
+        // 添加编辑模式切换监听器
+        editPreviewCheckBox.addActionListener { togglePreviewEditMode() }
         
         // 添加显示设置事件监听器
         hideOperationPanelCheckBox.addActionListener { /* 设置变化时不需要特殊处理 */ }
@@ -295,8 +387,18 @@ class HelloReadSettingComponent : SearchableConfigurable {
         hideProgressLabelCheckBox.addActionListener { /* 设置变化时不需要特殊处理 */ }
         autoSaveProgressCheckBox.addActionListener { /* 设置变化时不需要特殊处理 */ }
         
+        // 添加背景颜色设置事件监听器
+        backgroundColorButton.addActionListener { showColorChooser() }
+        
+        // 预设颜色按钮事件监听器
+        presetColorButton1.addActionListener { setPresetColor(DisplaySettings.DARK_THEME_BACKGROUND) }
+        presetColorButton2.addActionListener { setPresetColor(DisplaySettings.LIGHT_THEME_BACKGROUND) }
+        
         // 初始预览
         updatePreview()
+        
+        // 初始编辑模式
+        togglePreviewEditMode()
     }
     
     /**
@@ -323,6 +425,65 @@ class HelloReadSettingComponent : SearchableConfigurable {
             previewArea.font = Font(currentFontSettings.fontFamily, Font.PLAIN, currentFontSettings.fontSize)
         }
     }
+    
+    /**
+     * 切换预览编辑模式
+     */
+    private fun togglePreviewEditMode() {
+        previewArea.isEditable = editPreviewCheckBox.isSelected
+        if (editPreviewCheckBox.isSelected) {
+            previewArea.toolTipText = "现在可以编辑预览文本"
+        } else {
+            previewArea.toolTipText = "预览模式，不可编辑"
+        }
+    }
+    
+    /**
+     * 加载背景颜色设置
+     */
+    private fun loadBackgroundColorSettings() {
+        val backgroundColor = currentDisplaySettings.backgroundColor
+        try {
+            val color = Color.decode(backgroundColor)
+            backgroundColorPreview.background = color
+        } catch (e: Exception) {
+            // 如果颜色解析失败，使用默认颜色
+            backgroundColorPreview.background = Color.decode(DisplaySettings.DEFAULT.backgroundColor)
+        }
+    }
+    
+    /**
+     * 显示颜色选择器
+     */
+    private fun showColorChooser() {
+        val currentColor = backgroundColorPreview.background
+        val selectedColor = ColorChooser.chooseColor(
+            backgroundColorButton,
+            "选择背景颜色",
+            currentColor,
+            true,
+            emptyList(),
+            true
+        )
+        
+        if (selectedColor != null) {
+            backgroundColorPreview.background = selectedColor
+        }
+    }
+    
+    /**
+     * 设置预设颜色
+     */
+    private fun setPresetColor(colorHex: String) {
+        try {
+            val color = Color.decode(colorHex)
+            backgroundColorPreview.background = color
+        } catch (e: Exception) {
+            // 忽略颜色解析错误
+        }
+    }
+    
+
 
     override fun isModified(): Boolean {
         try {
@@ -333,13 +494,15 @@ class HelloReadSettingComponent : SearchableConfigurable {
             
             val newFontSettings = FontSettings(fontFamily, fontSize, lineSpacing, paragraphSpacing)
             val statusBarInterval = statusBarScrollIntervalField.text.toIntOrNull() ?: 3000
+            val backgroundColor = String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF)
             val newDisplaySettings = DisplaySettings(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
                 hideProgressLabelCheckBox.isSelected,
                 autoSaveProgressCheckBox.isSelected,
                 statusBarAutoScrollCheckBox.isSelected,
-                statusBarInterval
+                statusBarInterval,
+                backgroundColor
             )
             
             return newFontSettings != originalFontSettings || newDisplaySettings != originalDisplaySettings
@@ -361,13 +524,15 @@ class HelloReadSettingComponent : SearchableConfigurable {
             
             val newFontSettings = FontSettings(fontFamily, fontSize, lineSpacing, paragraphSpacing)
             val statusBarInterval = statusBarScrollIntervalField.text.toIntOrNull() ?: 3000
+            val backgroundColor = String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF)
             val newDisplaySettings = DisplaySettings(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
                 hideProgressLabelCheckBox.isSelected,
                 autoSaveProgressCheckBox.isSelected,
                 statusBarAutoScrollCheckBox.isSelected,
-                statusBarInterval
+                statusBarInterval,
+                backgroundColor
             )
             
             if (newFontSettings.isValid() && newDisplaySettings.isValid()) {
@@ -388,7 +553,8 @@ class HelloReadSettingComponent : SearchableConfigurable {
                     readerNotificationService.notifyReaderUpdateDisplay(
                         newDisplaySettings.hideOperationPanel,
                         newDisplaySettings.hideTitleButton,
-                        newDisplaySettings.hideProgressLabel
+                        newDisplaySettings.hideProgressLabel,
+                        newDisplaySettings.backgroundColor
                     )
                 }
             } else {

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.xucux"
-version = "1.0.0-231"
+version = "1.0.1-231"
 
 repositories {
 

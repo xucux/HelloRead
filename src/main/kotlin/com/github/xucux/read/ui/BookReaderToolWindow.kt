@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.ui.JBColor
 import javax.swing.text.*
 import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
@@ -64,6 +65,7 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
     private var hideOperationPanel = false
     private var hideTitleButton = false
     private var hideProgressLabel = false
+    private var backgroundColor = ""
     
     // 滚动自动加载相关
     private var isAutoLoading = false
@@ -429,7 +431,8 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
             updateDisplaySettings(
                 displaySettings.hideOperationPanel,
                 displaySettings.hideTitleButton,
-                displaySettings.hideProgressLabel
+                displaySettings.hideProgressLabel,
+                displaySettings.backgroundColor
             )
             
             // 根据参数决定是否使用阅读记录
@@ -885,7 +888,8 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
         updateDisplaySettings(
             displaySettings.hideOperationPanel,
             displaySettings.hideTitleButton,
-            displaySettings.hideProgressLabel
+            displaySettings.hideProgressLabel,
+            displaySettings.backgroundColor
         )
     }
     
@@ -949,10 +953,11 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
     /**
      * 更新显示设置
      */
-    fun updateDisplaySettings(hideOperationPanel: Boolean, hideTitle: Boolean, hideProgress: Boolean) {
+    fun updateDisplaySettings(hideOperationPanel: Boolean, hideTitle: Boolean, hideProgress: Boolean, backgroundColor: String = "") {
         this.hideOperationPanel = hideOperationPanel
         this.hideTitleButton = hideTitle
         this.hideProgressLabel = hideProgress
+        this.backgroundColor = backgroundColor
         applyDisplaySettings()
     }
     
@@ -969,9 +974,44 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
         // 控制章节标题面板显示
         chapterTitlePanel.isVisible = !hideProgressLabel
         
+        // 应用背景颜色设置
+        applyBackgroundColor()
+        
         // 重新布局
         revalidate()
         repaint()
+    }
+    
+    /**
+     * 应用背景颜色设置
+     */
+    private fun applyBackgroundColor() {
+        val bgColor = if (backgroundColor.isEmpty()) {
+            // 使用IDEA默认背景色
+            try {
+//                com.intellij.util.ui.UIUtil.getEditorPaneBackground()
+                JBColor.getColor("#2B2B2B")
+            } catch (e: Exception) {
+                JBColor.BLACK
+            }
+        } else {
+            // 使用自定义背景色
+            try {
+                java.awt.Color.decode(backgroundColor)
+            } catch (e: Exception) {
+                // 如果颜色解析失败，使用默认颜色
+                try {
+//                    com.intellij.util.ui.UIUtil.getEditorPaneBackground()
+                    JBColor.getColor("#2B2B2B")
+                } catch (e: Exception) {
+                    JBColor.BLACK
+                }
+            }
+        }
+        
+        // 设置内容区域背景色
+        contentArea.background = bgColor
+        contentArea.isOpaque = true
     }
     
     /**

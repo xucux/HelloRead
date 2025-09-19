@@ -45,6 +45,9 @@ class DisplaySettingsService {
             properties.setProperty("${StorageConstants.DISPLAY_PREFIX}hideTitleButton", settings.hideTitleButton.toString())
             properties.setProperty("${StorageConstants.DISPLAY_PREFIX}hideProgressLabel", settings.hideProgressLabel.toString())
             properties.setProperty("${StorageConstants.DISPLAY_PREFIX}autoSaveProgress", settings.autoSaveProgress.toString())
+            properties.setProperty("${StorageConstants.DISPLAY_PREFIX}statusBarAutoScroll", settings.statusBarAutoScroll.toString())
+            properties.setProperty("${StorageConstants.DISPLAY_PREFIX}statusBarScrollInterval", settings.statusBarScrollInterval.toString())
+            properties.setProperty("${StorageConstants.DISPLAY_PREFIX}backgroundColor", settings.backgroundColor)
             
             saveProperties(properties, displaySettingsFile)
             logger.info("保存界面显示设置成功")
@@ -64,8 +67,11 @@ class DisplaySettingsService {
             val hideTitleButton = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}hideTitleButton")?.toBoolean() ?: DisplaySettings.DEFAULT.hideTitleButton
             val hideProgressLabel = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}hideProgressLabel")?.toBoolean() ?: DisplaySettings.DEFAULT.hideProgressLabel
             val autoSaveProgress = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}autoSaveProgress")?.toBoolean() ?: DisplaySettings.DEFAULT.autoSaveProgress
+            val statusBarAutoScroll = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}statusBarAutoScroll")?.toBoolean() ?: DisplaySettings.DEFAULT.statusBarAutoScroll
+            val statusBarScrollInterval = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}statusBarScrollInterval")?.toIntOrNull() ?: DisplaySettings.DEFAULT.statusBarScrollInterval
+            val backgroundColor = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}backgroundColor") ?: DisplaySettings.DEFAULT.backgroundColor
             
-            val settings = DisplaySettings(hideOperationPanel, hideTitleButton, hideProgressLabel, autoSaveProgress)
+            val settings = DisplaySettings(hideOperationPanel, hideTitleButton, hideProgressLabel, autoSaveProgress, statusBarAutoScroll, statusBarScrollInterval, backgroundColor)
             
             if (settings.isValid()) {
                 logger.info("加载界面显示设置成功")

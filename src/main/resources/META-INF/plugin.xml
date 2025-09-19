@@ -10,7 +10,9 @@
     <idea-version since-build="231" until-build="253.*"/>
     <change-notes>
         <![CDATA[
-    <p>1.0.0-231</p>
+    <p>1.0.1</p>
+    <p>- Add Color Settings</p>
+    <p>1.0.0</p>
     <p>- Initial release</p>
         ]]>
     </change-notes>
