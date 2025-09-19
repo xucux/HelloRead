@@ -6,7 +6,6 @@ import com.github.xucux.read.model.FontSettings
 import com.github.xucux.read.service.DisplaySettingsService
 import com.github.xucux.read.service.FontSettingsService
 import com.github.xucux.read.service.notify.ReaderNotificationService
-import com.ibm.icu.text.CaseMap.Title
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.SimpleToolWindowPanel
@@ -17,7 +16,6 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
 import com.intellij.ui.ColorChooser
 import java.awt.Color
-import kotlinx.html.B
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.Font
