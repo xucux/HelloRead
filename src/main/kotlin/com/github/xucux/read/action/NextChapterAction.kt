@@ -6,7 +6,7 @@ import com.github.xucux.read.service.StatusBarReadingService
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
-import org.slf4j.LoggerFactory
+import com.intellij.openapi.diagnostic.logger
 
 /**
  * 下一章快捷键动作
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 class NextChapterAction : AnAction(), DumbAware {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(NextChapterAction::class.java)
+        private val logger = logger<NextChapterAction>()
         private val statusBarReadingService = StatusBarReadingService.getInstance()
     }
     

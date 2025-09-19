@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.xucux"
-version = "1.0.0-201"
+version = "1.0.1-201"
 
 repositories {
 
@@ -27,16 +27,12 @@ repositories {
 }
 
 dependencies {
-    // 日志依赖
-    implementation("org.slf4j:slf4j-api:2.0.9")
-    implementation("ch.qos.logback:logback-classic:1.4.11")
-    implementation("ch.qos.logback:logback-core:1.4.11")
-    // Kotlin 标准库扩展
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
-    // HTML 处理
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1")
-    // ICU4J 用于文本处理
-    implementation("com.ibm.icu:icu4j:72.1")
+//    // Kotlin 标准库扩展
+//    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
+//    // HTML 处理
+//    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1")
+//    // ICU4J 用于文本处理
+//    implementation("com.ibm.icu:icu4j:72.1")
 }
 
 // Configure Gradle IntelliJ Plugin
@@ -56,6 +52,10 @@ tasks {
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
+    }
+    withType<JavaExec> {
+        // 解决控制台中文乱码
+        jvmArgs = listOf("-Dfile.encoding=UTF-8", "-Dfile.stdout.encoding=UTF-8", "-Dfile.stderr.encoding=UTF-8")
     }
 
     patchPluginXml {

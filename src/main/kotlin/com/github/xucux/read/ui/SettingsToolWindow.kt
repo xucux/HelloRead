@@ -15,8 +15,11 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
+import com.intellij.ui.ColorChooser
+import java.awt.Color
 import kotlinx.html.B
 import java.awt.BorderLayout
+import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -41,6 +44,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     private lateinit var paragraphSpacingField: JBTextField
     private lateinit var previewArea: JTextPane
     private lateinit var applyFontButton: JButton
+    private lateinit var editPreviewCheckBox: JBCheckBox
     
     // 界面显示选项
     private lateinit var hideOperationPanelCheckBox: JBCheckBox
@@ -49,6 +53,12 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     private lateinit var autoSaveProgressCheckBox: JBCheckBox
     private lateinit var statusBarAutoScrollCheckBox: JBCheckBox
     private lateinit var statusBarScrollIntervalField: JBTextField
+    
+    // 背景颜色设置
+    private lateinit var backgroundColorButton: JButton
+    private lateinit var backgroundColorPreview: JLabel
+    private lateinit var presetColorButton1: JButton
+    private lateinit var presetColorButton2: JButton
     
     
     private var currentFontSettings: FontSettings = FontSettings.DEFAULT
@@ -110,7 +120,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 字体族设置
         val fontFamilyLabel = JLabel("字体族:")
-        fontFamilyLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 0
         gbc.gridwidth = 1
@@ -128,7 +137,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 字体大小设置
         val fontSizeLabel = JLabel("字体大小:")
-        fontSizeLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 1
         gbc.anchor = GridBagConstraints.WEST
@@ -145,7 +153,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 行间距设置
         val lineSpacingLabel = JLabel("行间距:")
-        lineSpacingLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 2
         gbc.anchor = GridBagConstraints.WEST
@@ -162,7 +169,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 段落间距设置
         val paragraphSpacingLabel = JLabel("段落间距:")
-        paragraphSpacingLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 3
         gbc.anchor = GridBagConstraints.WEST
@@ -178,14 +184,20 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         settingsPanel.add(paragraphSpacingField, gbc)
         
         // 预览区域
+        val previewHeaderPanel = JPanel(BorderLayout())
         val previewLabel = JLabel("预览:")
-        previewLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
+        previewHeaderPanel.add(previewLabel, BorderLayout.WEST)
+        
+        editPreviewCheckBox = JBCheckBox("启用预览编辑")
+        editPreviewCheckBox.toolTipText = "勾选后可以在预览区域编辑文本"
+        previewHeaderPanel.add(editPreviewCheckBox, BorderLayout.EAST)
+        
         gbc.gridx = 0
         gbc.gridy = 4
         gbc.gridwidth = 2
         gbc.anchor = GridBagConstraints.WEST
         gbc.insets = JBUI.insets(10, 0, 5, 0)
-        settingsPanel.add(previewLabel, gbc)
+        settingsPanel.add(previewHeaderPanel, gbc)
         
         previewArea = JTextPane()
         previewArea.isEditable = false
@@ -195,8 +207,22 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
                 "支持中文和英文混合显示。\n" +
                 "The quick brown fox jumps over the lazy dog."
         previewArea.border = JBUI.Borders.empty(5)
+        previewArea.toolTipText = "预览模式，不可编辑"
         
-        val scrollPane = JScrollPane(previewArea)
+        // 设置预览区域的固定高度，防止编辑时被撑开
+        previewArea.preferredSize = java.awt.Dimension(300, 150)
+        previewArea.minimumSize = java.awt.Dimension(300, 150)
+        previewArea.maximumSize = java.awt.Dimension(300, 150)
+        
+        val scrollPane = JBScrollPane(previewArea)
+        scrollPane.border = JBUI.Borders.compound(
+            JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
+            JBUI.Borders.empty(5)
+        )
+        // 设置滚动面板的固定高度
+        scrollPane.preferredSize = java.awt.Dimension(310, 160)
+        scrollPane.minimumSize = java.awt.Dimension(310, 160)
+        scrollPane.maximumSize = java.awt.Dimension(310, 160)
         gbc.gridx = 0
         gbc.gridy = 5
         gbc.gridwidth = 2
@@ -208,7 +234,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 应用按钮
         applyFontButton = JButton("应用字体设置")
-        applyFontButton.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 6
         gbc.gridwidth = 2
@@ -240,7 +265,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 隐藏操作面板
         hideOperationPanelCheckBox = JBCheckBox("隐藏阅读界面的操作面板")
-        hideOperationPanelCheckBox.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 0
         gbc.gridwidth = 2
@@ -250,7 +274,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 隐藏标题按钮
         hideTitleButtonCheckBox = JBCheckBox("隐藏阅读界面的标题按钮")
-        hideTitleButtonCheckBox.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 1
         gbc.gridwidth = 2
@@ -260,7 +283,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 隐藏进度标签
         hideProgressLabelCheckBox = JBCheckBox("隐藏阅读界面的进度标签")
-        hideProgressLabelCheckBox.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 2
         gbc.gridwidth = 2
@@ -270,7 +292,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 自动保存进度
         autoSaveProgressCheckBox = JBCheckBox("自动保存阅读进度")
-        autoSaveProgressCheckBox.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         autoSaveProgressCheckBox.isSelected = true
         gbc.gridx = 0
         gbc.gridy = 3
@@ -281,7 +302,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 底部状态栏自动滚动
         statusBarAutoScrollCheckBox = JBCheckBox("底部状态栏自动滚动")
-        statusBarAutoScrollCheckBox.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 4
         gbc.gridwidth = 2
@@ -291,7 +311,6 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         // 底部状态栏滚动间隔
         val statusBarIntervalLabel = JLabel("滚动间隔(毫秒):")
-        statusBarIntervalLabel.font = Font(Font.SANS_SERIF, Font.PLAIN, 12)
         gbc.gridx = 0
         gbc.gridy = 5
         gbc.gridwidth = 1
@@ -306,6 +325,66 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         gbc.anchor = GridBagConstraints.WEST
         gbc.insets = JBUI.insets(5, 10, 5, 0)
         optionsPanel.add(statusBarScrollIntervalField, gbc)
+        
+        // 背景颜色设置
+        val backgroundColorLabel = JLabel("阅读器背景颜色:")
+        gbc.gridx = 0
+        gbc.gridy = 6
+        gbc.gridwidth = 1
+        gbc.anchor = GridBagConstraints.WEST
+        gbc.insets = JBUI.insets(5, 0, 5, 10)
+        optionsPanel.add(backgroundColorLabel, gbc)
+        
+        // 颜色预览和选择按钮面板
+        val colorSelectionPanel = JPanel(FlowLayout())
+        backgroundColorPreview = JLabel("  ")
+        backgroundColorPreview.background = Color.WHITE
+        backgroundColorPreview.border = JBUI.Borders.compound(
+            JBUI.Borders.customLine(Color.GRAY),
+            JBUI.Borders.empty(2)
+        )
+        backgroundColorPreview.preferredSize = java.awt.Dimension(30, 20)
+        backgroundColorPreview.isOpaque = true
+        colorSelectionPanel.add(backgroundColorPreview, BorderLayout.WEST)
+        
+        backgroundColorButton = JButton("选择颜色")
+        colorSelectionPanel.add(backgroundColorButton, BorderLayout.CENTER)
+
+
+        // 预设颜色按钮
+        val presetColorPanel = JPanel()
+        presetColorPanel.layout = BoxLayout(presetColorPanel, BoxLayout.X_AXIS)
+
+        // 初始化预设颜色按钮
+        presetColorButton1 = JButton()
+        presetColorButton1.background = Color.decode("#2B2B2B")
+        presetColorButton1.isBorderPainted = false
+//        presetColorButton1.isOpaque = true
+        presetColorButton1.foreground = Color.decode("#2B2B2B")
+        presetColorButton1.preferredSize = java.awt.Dimension(50, 25)
+        presetColorButton1.toolTipText = "深色背景 (#2B2B2B)"
+
+        // 初始化预设颜色按钮2
+        presetColorButton2 = JButton()
+        presetColorButton2.background = Color.decode("#FFFFFF")
+        presetColorButton2.isBorderPainted = false
+        presetColorButton2.isOpaque = true
+        presetColorButton2.preferredSize = java.awt.Dimension(50, 25)
+        presetColorButton2.toolTipText = "浅色背景 (#FFFFFF)"
+
+        presetColorPanel.add(Box.createHorizontalStrut(5))
+        presetColorPanel.add(presetColorButton1)
+        presetColorPanel.add(Box.createHorizontalStrut(5))
+        presetColorPanel.add(presetColorButton2)
+
+        colorSelectionPanel.add( JLabel("预设："))
+        colorSelectionPanel.add(presetColorPanel)
+        
+        gbc.gridx = 1
+        gbc.gridy = 6
+        gbc.anchor = GridBagConstraints.WEST
+        gbc.insets = JBUI.insets(5, 10, 5, 0)
+        optionsPanel.add(colorSelectionPanel, gbc)
         
         // 将选项面板添加到主面板的中心
         panel.add(optionsPanel, BorderLayout.CENTER)
@@ -333,6 +412,11 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         
         paragraphSpacingField.addActionListener {
             updateFontPreview()
+        }
+        
+        // 编辑模式切换监听器
+        editPreviewCheckBox.addActionListener {
+            togglePreviewEditMode()
         }
         
         // 应用字体设置按钮
@@ -381,6 +465,20 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
             saveDisplaySettings()
         }
         
+        // 背景颜色设置事件监听器
+        backgroundColorButton.addActionListener {
+            showColorChooser()
+        }
+        
+        // 预设颜色按钮事件监听器
+        presetColorButton1.addActionListener {
+            setPresetColor(DisplaySettings.DARK_THEME_BACKGROUND)
+        }
+        
+        presetColorButton2.addActionListener {
+            setPresetColor(DisplaySettings.LIGHT_THEME_BACKGROUND)
+        }
+        
     }
     
     /**
@@ -391,6 +489,9 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         currentFontSettings = fontSettingsService.loadFontSettings()
         updateFontSettingsDisplay()
         updateFontPreview()
+        
+        // 初始编辑模式
+        togglePreviewEditMode()
         
         // 加载显示设置（这里可以从配置文件或服务中加载）
         loadDisplaySettings()
@@ -440,6 +541,18 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     }
     
     /**
+     * 切换预览编辑模式
+     */
+    private fun togglePreviewEditMode() {
+        previewArea.isEditable = editPreviewCheckBox.isSelected
+        if (editPreviewCheckBox.isSelected) {
+            previewArea.toolTipText = "现在可以编辑预览文本"
+        } else {
+            previewArea.toolTipText = "预览模式，不可编辑"
+        }
+    }
+    
+    /**
      * 保存字体设置
      */
     private fun saveFontSettings() {
@@ -471,6 +584,9 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         autoSaveProgressCheckBox.isSelected = currentDisplaySettings.autoSaveProgress
         statusBarAutoScrollCheckBox.isSelected = currentDisplaySettings.statusBarAutoScroll
         statusBarScrollIntervalField.text = currentDisplaySettings.statusBarScrollInterval.toString()
+        
+        // 加载背景颜色设置
+        loadBackgroundColorSettings()
     }
 
     /**
@@ -480,13 +596,15 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         try {
             // 创建新的显示设置对象
             val statusBarInterval = statusBarScrollIntervalField.text.toIntOrNull() ?: 3000
+            val backgroundColor = String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF)
             val newDisplaySettings = DisplaySettings(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
                 hideProgressLabelCheckBox.isSelected,
                 autoSaveProgressCheckBox.isSelected,
                 statusBarAutoScrollCheckBox.isSelected,
-                statusBarInterval
+                statusBarInterval,
+                backgroundColor
             )
             
             // 保存到存储
@@ -497,8 +615,77 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
             // 忽略错误，保持当前设置
         }
     }
-
-
-
+    
+    /**
+     * 加载背景颜色设置
+     */
+    private fun loadBackgroundColorSettings() {
+        val backgroundColor = currentDisplaySettings.backgroundColor
+        try {
+            val color = Color.decode(backgroundColor)
+            backgroundColorPreview.background = color
+        } catch (e: Exception) {
+            // 如果颜色解析失败，使用默认颜色
+            backgroundColorPreview.background = Color.decode(DisplaySettings.DEFAULT.backgroundColor)
+        }
+    }
+    
+    /**
+     * 显示颜色选择器
+     */
+    private fun showColorChooser() {
+        val currentColor = backgroundColorPreview.background
+        val selectedColor = ColorChooser.chooseColor(
+            backgroundColorButton,
+            "选择背景颜色",
+            currentColor,
+            true,
+            emptyList(),
+            true
+        )
+        
+        if (selectedColor != null) {
+            backgroundColorPreview.background = selectedColor
+            saveDisplaySettings()
+            readerNotificationService.notifyReaderUpdateDisplay(
+                hideOperationPanelCheckBox.isSelected,
+                hideTitleButtonCheckBox.isSelected,
+                hideProgressLabelCheckBox.isSelected,
+                String.format("#%06X", selectedColor.rgb and 0xFFFFFF)
+            )
+        }
+    }
+    
+    /**
+     * 设置预设颜色
+     */
+    private fun setPresetColor(colorHex: String) {
+        try {
+            val color = Color.decode(colorHex)
+            backgroundColorPreview.background = color
+            saveDisplaySettings()
+            readerNotificationService.notifyReaderUpdateDisplay(
+                hideOperationPanelCheckBox.isSelected,
+                hideTitleButtonCheckBox.isSelected,
+                hideProgressLabelCheckBox.isSelected,
+                colorHex
+            )
+        } catch (e: Exception) {
+            // 忽略颜色解析错误
+        }
+    }
+    
+    /**
+     * 获取IDEA编辑器背景颜色
+     */
+    private fun getIDEAEditorBackgroundColor(): Color {
+        return try {
+            // 尝试获取IDEA编辑器的背景颜色
+            com.intellij.util.ui.UIUtil.getEditorPaneBackground()
+        } catch (e: Exception) {
+            // 如果获取失败，使用系统默认背景色
+            Color.WHITE
+        }
+    }
 
 }

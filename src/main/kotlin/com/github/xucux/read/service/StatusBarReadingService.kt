@@ -253,7 +253,6 @@ class StatusBarReadingService {
                     chapter = currentChapter!!,
                     lineNumber = currentLineIndex + 1 // 转换为从1开始的行号
                 )
-                logger.debug("保存状态栏阅读进度: ${currentBook!!.title} - ${currentChapter!!.title} 第${currentLineIndex + 1}行")
             } catch (e: Exception) {
                 logger.error("保存状态栏阅读进度失败", e)
             }

@@ -9,7 +9,7 @@ import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
-import org.slf4j.LoggerFactory
+import com.intellij.openapi.diagnostic.logger
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Font
@@ -27,7 +27,7 @@ class BookChaptersDialog(
 ) : DialogWrapper(project) {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(BookChaptersDialog::class.java)
+        private val logger = logger<BookChaptersDialog>()
     }
     
     private val chapterParserService = ChapterParserService.getInstance()

@@ -6,7 +6,7 @@ import com.github.xucux.read.util.PopNotifyUtil
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
-import org.slf4j.LoggerFactory
+import com.intellij.openapi.diagnostic.logger
 
 /**
  * 查看章节列表动作
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 class ViewChaptersAction : AnAction(), DumbAware {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(ViewChaptersAction::class.java)
+        private val logger = logger<ViewChaptersAction>()
     }
     
     override fun actionPerformed(e: AnActionEvent) {
