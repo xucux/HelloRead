@@ -5,6 +5,7 @@ import com.github.xucux.read.model.Book
 import com.github.xucux.read.model.Chapter
 import com.github.xucux.read.service.ChapterParserService
 import com.github.xucux.read.service.DataStorageService
+import com.github.xucux.read.service.GlobalCacheService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.components.JBList
@@ -17,14 +18,16 @@ import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import javax.swing.*
 import java.util.Locale
+import javax.swing.SwingUtilities
 
 /**
  * 章节列表工具窗口
  */
-class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPanel(true, true) {
+class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPanel(true, true), GlobalCacheService.CacheListener {
     
     private val dataStorageService = DataStorageService.getInstance()
     private val chapterParserService = ChapterParserService.getInstance()
+    private val globalCacheService = GlobalCacheService.getInstance()
     
     private lateinit var chapterList: JBList<String>
     private lateinit var searchField: JBTextField
@@ -40,6 +43,10 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
         layout = BorderLayout()
         setupUI()
         setupEventListeners()
+        
+        // 注册缓存监听器
+        globalCacheService.addCacheListener(this)
+        
         // 自动加载最近阅读的书籍
         loadCurrentReadingBook()
     }
@@ -132,6 +139,14 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
      */
     private fun loadCurrentReadingBook() {
         try {
+            // 优先从全局缓存获取当前阅读书籍
+            val cachedBook = globalCacheService.getCurrentReadingBook()
+            if (cachedBook != null) {
+                setCurrentBook(cachedBook)
+                return
+            }
+            
+            // 如果缓存中没有，则从数据存储服务加载
             val books = dataStorageService.loadAllBooks()
             if (books.isNotEmpty()) {
                 // 获取最近阅读的书籍（loadAllBooks已经按最后阅读时间排序）
@@ -153,7 +168,16 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
     fun setCurrentBook(book: Book) {
         currentBook = book
         bookInfoLabel.text = "《${book.title}》"
-        loadChapters()
+        
+        // 优先从全局缓存获取章节信息
+        val cachedChapters = globalCacheService.getBookChapters(book.id)
+        if (cachedChapters != null && cachedChapters.isNotEmpty()) {
+            chapters = cachedChapters
+            updateChapterListFromCache()
+        } else {
+            // 如果缓存中没有，则重新加载章节
+            loadChapters()
+        }
     }
     
     /**
@@ -161,6 +185,21 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
      */
     fun syncCurrentReadingBook() {
         loadCurrentReadingBook()
+    }
+    
+    /**
+     * 从缓存更新章节列表
+     */
+    private fun updateChapterListFromCache() {
+        // 创建章节标题列表
+        allChapterTitles = chapters.mapIndexed { _, chapter ->
+            "${chapter.index}. ${chapter.title}"
+        }
+        filteredChapterTitles = allChapterTitles
+        
+        // 更新UI
+        updateChapterList()
+        updateChapterCount()
     }
     
     /**
@@ -182,6 +221,9 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
                 showError("无法解析章节内容")
                 return
             }
+            
+            // 将章节信息保存到全局缓存
+            globalCacheService.setBookChapters(book.id, chapters)
             
             // 创建章节标题列表
             allChapterTitles = chapters.mapIndexed { _, chapter ->
@@ -268,6 +310,14 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
         // 保存更新后的书籍信息
         dataStorageService.saveBook(updatedBook)
         
+        // 更新全局缓存
+        globalCacheService.cacheBookInfo(updatedBook)
+        globalCacheService.updateCurrentBookChapterIndex(
+            selectedIndex, 
+            chapters[selectedIndex].title, 
+            chapters[selectedIndex].originalTitle
+        )
+        
         // 通知阅读器打开书籍
         notifyReaderOpenBook(updatedBook)
     }
@@ -330,5 +380,37 @@ class ChapterListToolWindow(private val project: Project) : SimpleToolWindowPane
         chapterCountLabel.text = ""
         searchField.text = ""
         chapterList.model = DefaultListModel<String>()
+    }
+    
+    // GlobalCacheService.CacheListener 接口实现
+    override fun onCurrentReadingBookChanged(oldBook: Book?, newBook: Book?) {
+        // 当全局缓存中的当前阅读书籍发生变化时，同步更新章节列表
+        SwingUtilities.invokeLater {
+            if (newBook != null) {
+                setCurrentBook(newBook)
+            } else {
+                clear()
+            }
+        }
+    }
+    
+    override fun onBookChaptersChanged(bookId: String, chapters: List<Chapter>) {
+        // 当书籍章节发生变化时，如果当前显示的是该书籍，则更新显示
+        SwingUtilities.invokeLater {
+            if (currentBook?.id == bookId) {
+                this.chapters = chapters
+                updateChapterListFromCache()
+            }
+        }
+    }
+    
+    override fun onBookInfoChanged(book: Book) {
+        // 当书籍信息发生变化时，如果当前显示的是该书籍，则更新显示
+        SwingUtilities.invokeLater {
+            if (currentBook?.id == book.id) {
+                currentBook = book
+                bookInfoLabel.text = "《${book.title}》"
+            }
+        }
     }
 }

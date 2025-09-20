@@ -2,7 +2,9 @@ package com.github.xucux.read.ui
 
 import com.github.xucux.read.constants.TabConstants
 import com.github.xucux.read.model.Book
+import com.github.xucux.read.model.Chapter
 import com.github.xucux.read.service.DataStorageService
+import com.github.xucux.read.service.GlobalCacheService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.components.JBScrollPane
@@ -15,14 +17,20 @@ import com.intellij.ui.table.JBTable
 import java.awt.FlowLayout
 import javax.swing.ListSelectionModel
 import javax.swing.table.DefaultTableModel
+import javax.swing.JPopupMenu
+import javax.swing.JMenuItem
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import javax.swing.SwingUtilities
 
 
 /**
  * 我的书架工具窗口
  */
-class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, true) {
+class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, true), GlobalCacheService.CacheListener {
 
     private val dataStorageService = DataStorageService.getInstance()
+    private val globalCacheService = GlobalCacheService.getInstance()
     private val bookTable: JBTable
     private val tableModel: DefaultTableModel
     private val books: MutableList<Book> = mutableListOf()
@@ -30,6 +38,9 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
     // 书籍详情显示状态
     private var isBookDetailsVisible = true
     private val toolbar: JPanel
+    
+    // 右键菜单
+    private lateinit var contextMenu: JPopupMenu
 
     init {
         layout = BorderLayout()
@@ -45,12 +56,18 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
         }
         bookTable = JBTable(tableModel)
 
+        // 创建右键菜单
+        createContextMenu()
+
         // 配置表格
         setupTable()
 
         // 创建滚动面板
         val scrollPane = JBScrollPane(bookTable)
         add(scrollPane, BorderLayout.CENTER)
+
+        // 注册缓存监听器
+        globalCacheService.addCacheListener(this)
 
         // 加载书籍数据
         loadBooks()
@@ -118,6 +135,36 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
     }
 
     /**
+     * 创建右键菜单
+     */
+    private fun createContextMenu() {
+        contextMenu = JPopupMenu()
+        
+        // 阅读选项
+        val readMenuItem = JMenuItem("开始阅读")
+        readMenuItem.addActionListener { openSelectedBook() }
+        contextMenu.add(readMenuItem)
+        
+        // 查看章节选项
+        val chaptersMenuItem = JMenuItem("查看章节")
+        chaptersMenuItem.addActionListener { viewSelectedBookChapters() }
+        contextMenu.add(chaptersMenuItem)
+        
+        // 分隔线
+        contextMenu.addSeparator()
+        
+        // 重新解析选项
+        val reparseMenuItem = JMenuItem("重新解析")
+        reparseMenuItem.addActionListener { reparseSelectedBook() }
+        contextMenu.add(reparseMenuItem)
+        
+        // 删除选项
+        val deleteMenuItem = JMenuItem("删除书籍")
+        deleteMenuItem.addActionListener { deleteSelectedBook() }
+        contextMenu.add(deleteMenuItem)
+    }
+
+    /**
      * 配置表格
      */
     private fun setupTable() {
@@ -130,15 +177,28 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
         // 设置列宽
         setupColumnWidths()
 
-        // 添加双击事件监听器
+        // 添加鼠标事件监听器
         bookTable.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 if (e.clickCount == 2) {
+                    // 双击打开阅读器
                     val selectedRow = bookTable.selectedRow
                     if (selectedRow >= 0 && selectedRow < books.size) {
                         val selectedBook = books[selectedRow]
                         openBookReader(selectedBook)
                     }
+                }
+            }
+            
+            override fun mousePressed(e: MouseEvent) {
+                if (e.isPopupTrigger) {
+                    showContextMenu(e)
+                }
+            }
+            
+            override fun mouseReleased(e: MouseEvent) {
+                if (e.isPopupTrigger) {
+                    showContextMenu(e)
                 }
             }
         })
@@ -321,6 +381,9 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
      */
     private fun openBookReader(book: Book) {
         try {
+            // 设置当前阅读书籍到全局缓存
+            globalCacheService.setCurrentReadingBook(book)
+            
             // 获取HelloRead工具窗口
             val toolWindowManager = com.intellij.openapi.wm.ToolWindowManager.getInstance(project)
             val helloReadToolWindow = toolWindowManager.getToolWindow(TabConstants.HELLO_READ_TOOL_WINDOW_ID)
@@ -363,5 +426,127 @@ class BookshelfToolWindow(val project: Project) : SimpleToolWindowPanel(true, tr
      */
     fun onWindowShown() {
         loadBooks()
+    }
+    
+    /**
+     * 显示右键菜单
+     */
+    private fun showContextMenu(e: MouseEvent) {
+        val selectedRow = bookTable.selectedRow
+        if (selectedRow >= 0 && selectedRow < books.size) {
+            contextMenu.show(bookTable, e.x, e.y)
+        }
+    }
+    
+    /**
+     * 打开选中的书籍
+     */
+    private fun openSelectedBook() {
+        val selectedRow = bookTable.selectedRow
+        if (selectedRow >= 0 && selectedRow < books.size) {
+            val selectedBook = books[selectedRow]
+            openBookReader(selectedBook)
+        }
+    }
+    
+    /**
+     * 查看选中书籍的章节
+     */
+    private fun viewSelectedBookChapters() {
+        val selectedRow = bookTable.selectedRow
+        if (selectedRow >= 0 && selectedRow < books.size) {
+            val selectedBook = books[selectedRow]
+            viewBookChapters(selectedBook)
+        }
+    }
+    
+    /**
+     * 重新解析选中的书籍
+     */
+    private fun reparseSelectedBook() {
+        val selectedRow = bookTable.selectedRow
+        if (selectedRow >= 0 && selectedRow < books.size) {
+            val selectedBook = books[selectedRow]
+            reparseBook(selectedBook)
+        }
+    }
+    
+    /**
+     * 删除选中的书籍
+     */
+    private fun deleteSelectedBook() {
+        val selectedRow = bookTable.selectedRow
+        if (selectedRow >= 0 && selectedRow < books.size) {
+            val selectedBook = books[selectedRow]
+            val result = com.intellij.openapi.ui.Messages.showYesNoDialog(
+                "确定要删除书籍《${selectedBook.title}》吗？",
+                "确认删除",
+                "删除",
+                "取消",
+                com.intellij.openapi.ui.Messages.getQuestionIcon()
+            )
+            if (result == 0) {
+                dataStorageService.removeBook(selectedBook.id)
+                dataStorageService.removeReadingRecord(selectedBook.id)
+                // 清除全局缓存中的该书籍信息
+                globalCacheService.clearBookCache(selectedBook.id)
+                loadBooks()
+            }
+        }
+    }
+    
+    /**
+     * 查看书籍章节
+     */
+    private fun viewBookChapters(book: Book) {
+        try {
+            // 设置当前阅读书籍到全局缓存
+            globalCacheService.setCurrentReadingBook(book)
+            
+            // 获取HelloRead工具窗口
+            val toolWindowManager = com.intellij.openapi.wm.ToolWindowManager.getInstance(project)
+            val helloReadToolWindow = toolWindowManager.getToolWindow(TabConstants.HELLO_READ_TOOL_WINDOW_ID)
+
+            if (helloReadToolWindow != null) {
+                // 切换到章节列表标签页
+                val contentManager = helloReadToolWindow.contentManager
+                val chapterListContent = contentManager.contents.find { it.displayName == TabConstants.CHAPTER_LIST_TAB }
+                if (chapterListContent != null) {
+                    contentManager.setSelectedContent(chapterListContent)
+                    helloReadToolWindow.activate {
+                        // 获取章节列表组件并设置当前书籍
+                        val chapterListComponent = chapterListContent.component as? ChapterListToolWindow
+                        chapterListComponent?.setCurrentBook(book)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            com.intellij.openapi.ui.Messages.showErrorDialog(
+                "打开章节列表失败: ${e.message}",
+                "错误"
+            )
+        }
+    }
+    
+    // GlobalCacheService.CacheListener 接口实现
+    override fun onCurrentReadingBookChanged(oldBook: Book?, newBook: Book?) {
+        // 当全局缓存中的当前阅读书籍发生变化时，刷新书架显示
+        SwingUtilities.invokeLater {
+            loadBooks()
+        }
+    }
+    
+    override fun onBookChaptersChanged(bookId: String, chapters: List<Chapter>) {
+        // 当书籍章节发生变化时，刷新书架显示
+        SwingUtilities.invokeLater {
+            loadBooks()
+        }
+    }
+    
+    override fun onBookInfoChanged(book: Book) {
+        // 当书籍信息发生变化时，刷新书架显示
+        SwingUtilities.invokeLater {
+            loadBooks()
+        }
     }
 }

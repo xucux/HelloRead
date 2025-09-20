@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.xucux"
-version = "1.0.2-201"
+version = "1.0.3-201"
 
 repositories {
 
@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     implementation("com.googlecode.juniversalchardet:juniversalchardet:1.0.3")
-
+    
 //    // Kotlin 标准库扩展
 //    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
 //    // HTML 处理
