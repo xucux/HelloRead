@@ -23,11 +23,12 @@ import java.awt.event.ActionListener
 import javax.swing.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
+import javax.swing.SwingUtilities
 
 /**
  * 书籍阅读器工具窗口
  */
-class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel(true, true), com.github.xucux.read.service.StatusBarReadingCallback {
+class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel(true, true), com.github.xucux.read.service.StatusBarReadingCallback, GlobalCacheService.CacheListener {
     
     private val logger = logger<BookReaderToolWindow>()
     private val dataStorageService = DataStorageService.getInstance()
@@ -37,6 +38,7 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
     private val readingSettingsService = ReadingSettingsService.getInstance()
     private val statusBarReadingService = StatusBarReadingService.getInstance()
     private val readingRecordService = ReadingRecordService.getInstance()
+    private val globalCacheService = GlobalCacheService.getInstance()
     
     private var currentBook: Book? = null
     private var chapters: List<Chapter> = emptyList()
@@ -79,6 +81,9 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
         setupEventListeners()
         loadFontSettings()
         loadDisplaySettings()
+        
+        // 注册缓存监听器
+        globalCacheService.addCacheListener(this)
     }
     
     /**
@@ -411,12 +416,23 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
         currentBook = book
         titleLabel.text = book.title
         
+        // 设置当前阅读书籍到全局缓存
+        globalCacheService.setCurrentReadingBook(book)
+        
         try {
-            // 解析章节（使用缓存）
-            chapters = chapterParserService.parseChapters(book.file, book.id)
-            if (chapters.isEmpty()) {
-                contentArea.text = "章节内容解析为空"
-                return
+            // 优先从全局缓存获取章节信息
+            val cachedChapters = globalCacheService.getBookChapters(book.id)
+            if (cachedChapters != null && cachedChapters.isNotEmpty()) {
+                chapters = cachedChapters
+            } else {
+                // 如果缓存中没有，则解析章节
+                chapters = chapterParserService.parseChapters(book.file, book.id)
+                if (chapters.isEmpty()) {
+                    contentArea.text = "章节内容解析为空"
+                    return
+                }
+                // 将章节信息保存到全局缓存
+                globalCacheService.setBookChapters(book.id, chapters)
             }
             
             // 加载阅读设置
@@ -779,6 +795,14 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
             lastReadTime = System.currentTimeMillis()
         )
         dataStorageService.saveBook(updatedBook)
+        
+        // 更新全局缓存
+        globalCacheService.cacheBookInfo(updatedBook)
+        globalCacheService.updateCurrentBookChapterIndex(
+            currentChapterIndex, 
+            chapter.title, 
+            chapter.originalTitle
+        )
     }
     
     /**
@@ -1156,5 +1180,44 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
     
     override fun onPreviousChapter() {
         navigateToPreviousChapter()
+    }
+    
+    // GlobalCacheService.CacheListener 接口实现
+    override fun onCurrentReadingBookChanged(oldBook: Book?, newBook: Book?) {
+        // 当全局缓存中的当前阅读书籍发生变化时，如果当前阅读器没有打开书籍，则打开新书籍
+        SwingUtilities.invokeLater {
+            if (newBook != null && currentBook == null) {
+                openBook(newBook, useReadingRecord = true)
+            }
+        }
+    }
+    
+    override fun onBookChaptersChanged(bookId: String, chapters: List<Chapter>) {
+        // 当书籍章节发生变化时，如果当前阅读的是该书籍，则更新章节信息
+        SwingUtilities.invokeLater {
+            if (currentBook?.id == bookId) {
+                this.chapters = chapters
+                // 如果当前章节索引超出范围，重置为0
+                if (currentChapterIndex >= chapters.size) {
+                    currentChapterIndex = 0
+                }
+                // 重新加载当前章节
+                when (currentReadingSettings.readingMode) {
+                    ReadingMode.CHAPTER_MODE -> loadCurrentChapter()
+                    ReadingMode.SCROLL_MODE -> loadCurrentChapterForScrollMode()
+                    ReadingMode.STATUS_BAR_MODE -> startStatusBarReading()
+                }
+            }
+        }
+    }
+    
+    override fun onBookInfoChanged(book: Book) {
+        // 当书籍信息发生变化时，如果当前阅读的是该书籍，则更新书籍信息
+        SwingUtilities.invokeLater {
+            if (currentBook?.id == book.id) {
+                currentBook = book
+                titleLabel.text = book.title
+            }
+        }
     }
 }
