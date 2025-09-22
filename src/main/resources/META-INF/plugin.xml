@@ -6,10 +6,12 @@
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
     <name>HelloRead</name>
-    <version>1.0.4-201</version>
+    <version>1.0.5-201</version>
     <idea-version since-build="201.6668.113" until-build="223.*"/>
     <change-notes>
         <![CDATA[
+    <p>1.0.5</p>
+    <p>- Update Keyboard Shortcut </p>
     <p>1.0.4</p>
     <p>- Fix ChapterParser Bug</p>
     <p>1.0.3</p>
@@ -51,7 +53,7 @@
     </ul>
     
     <h4>Quick Start:</h4>
-    <p>Use <code>Ctrl+Alt+A</code> to add books, <code>Ctrl+Alt+B</code> to open bookshelf, and <code>Ctrl+Alt+R</code> to start reading.</p>
+    <p>Open reader <code>Ctrl+Alt+Numpad 1</code> to start reading.</p>
     <p>Previous Chapter: <code>Alt+Numpad 4</code>, Next Chapter: <code>Alt+Numpad 6</code>, Close Reader: <code>Ctrl+Alt+Numpad 0</code></p>
     <p>Scroll Up/Previous Line: <code>Alt+Numpad 8</code>, Scroll Down/Next Line: <code>Alt+Numpad 2</code></p>
     <hr>
@@ -77,7 +79,7 @@
     </ul>
     
     <h4>快速开始：</h4>
-    <p>使用 <code>Ctrl+Alt+A</code> 添加书籍，<code>Ctrl+Alt+B</code> 打开书架，<code>Ctrl+Alt+R</code> 开始阅读。</p>
+    <p>打开阅读器，<code>Ctrl+Alt+Numpad 1</code> 开始阅读。</p>
     <p>上一章：<code>Alt+Numpad 4</code>，下一章：<code>Alt+Numpad 6</code>，关闭阅读器：<code>Ctrl+Alt+Numpad 0</code></p>
     <p>向上滚动/上一行：<code>Alt+Numpad 8</code>，向下滚动/下一行：<code>Alt+Numpad 2</code></p>
     <p></p>
@@ -116,7 +118,7 @@
                     class="com.github.xucux.read.action.OpenHelloReadAction"
                     text="打开HelloRead"
                     description="打开HelloRead主窗口">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt B"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt NUMPAD1"/>
             </action>
             
             <!-- 打开书架标签页 -->
