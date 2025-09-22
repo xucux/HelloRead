@@ -232,22 +232,6 @@
                     description="在阅读器中向下滚动">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD2"/>
             </action>
-            
-            <!-- 悬浮阅读器向上滚动快捷键 -->
-            <action id="ReadBook.FloatingReaderScrollUp" 
-                    class="com.github.xucux.read.action.FloatingReaderScrollUpAction"
-                    text="悬浮阅读器向上滚动"
-                    description="在悬浮阅读器中向上滚动">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD8"/>
-            </action>
-            
-            <!-- 悬浮阅读器向下滚动快捷键 -->
-            <action id="ReadBook.FloatingReaderScrollDown" 
-                    class="com.github.xucux.read.action.FloatingReaderScrollDownAction"
-                    text="悬浮阅读器向下滚动"
-                    description="在悬浮阅读器中向下滚动">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD2"/>
-            </action>
         </group>
     </actions>
 </idea-plugin>
