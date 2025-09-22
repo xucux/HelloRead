@@ -147,13 +147,19 @@ class ChapterParserService {
             }
 
             val lines = content.split("\n")
-            var currentChapter: ChapterBuilder? = null
-            var chapterIndex = 0
+            var currentChapter: ChapterBuilder? = ChapterBuilder(
+                    index = 0,
+                    title = "序章",
+                    originalTitle = "开始——序章",
+                    chapterNumber = "开始",
+                    startLine = 0
+            )
+            var chapterIndex = 0 // 这个索引无法完全匹配章节名称
 
             for ((lineIndex, line) in lines.withIndex()) {
                 val trimmedLine = line.trim()
 
-                // 跳过空行和不需要的行
+                // 跳过空行
                 if (shouldSkipLine(trimmedLine)) {
                     continue
                 }
@@ -163,7 +169,7 @@ class ChapterParserService {
                 if (chapterTitleInfo != null) {
                     // 保存上一个章节
                     currentChapter?.let { builder ->
-                        chapters.add(builder.build())
+                        chapters.add(builder.build((lineIndex - 1).toLong()))
                     }
 
                     // 开始新章节
@@ -182,7 +188,7 @@ class ChapterParserService {
 
             // 保存最后一个章节
             currentChapter?.let { builder ->
-                chapters.add(builder.build())
+                chapters.add(builder.build(lines.size.toLong()))
             }
 
             logger.info("解析章节完成: ${file.name}, 共${chapters.size}章")
@@ -303,11 +309,11 @@ class ChapterParserService {
     private fun shouldSkipLine(line: String): Boolean {
         if (line.isEmpty()) return true
 
-        for (pattern in SKIP_PATTERNS) {
-            if (pattern.matcher(line).matches()) {
-                return true
-            }
-        }
+//        for (pattern in SKIP_PATTERNS) {
+//            if (pattern.matcher(line).matches()) {
+//                return true
+//            }
+//        }
 
         return false
     }
@@ -328,14 +334,14 @@ class ChapterParserService {
             contentLines.add(line)
         }
 
-        fun build(): Chapter {
+        fun build(endP: Long?): Chapter {
             val content = contentLines.joinToString("\n")
             return Chapter(
                     index = index,
                     title = title,
                     content = content,
                     startPosition = startLine.toLong(),
-                    endPosition = (startLine + contentLines.size).toLong(),
+                    endPosition = endP ?: (startLine + contentLines.size).toLong(),
                     originalTitle = originalTitle,
                     chapterNumber = chapterNumber
             )
