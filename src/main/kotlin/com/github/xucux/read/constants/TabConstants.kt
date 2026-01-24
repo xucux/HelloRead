@@ -13,20 +13,20 @@ object TabConstants {
     /**
      * 书架标签页名称
      */
-    const val BOOKSHELF_TAB = "书架"
+    const val BOOKSHELF_TAB = "Book"
     
     /**
      * 阅读器标签页名称
      */
-    const val READER_TAB = "阅读"
+    const val READER_TAB = "Read"
     
     /**
      * 章节列表标签页名称
      */
-    const val CHAPTER_LIST_TAB = "章节"
+    const val CHAPTER_LIST_TAB = "Chapter"
     
     /**
      * 设置标签页名称
      */
-    const val SETTINGS_TAB = "设置"
+    const val SETTINGS_TAB = "View"
 }
