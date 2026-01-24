@@ -357,7 +357,7 @@ class ChapterParserService {
             val lines = content.split("\n")
 
             val startLine = chapter.startPosition.toInt()
-            val endLine = chapter.endPosition.toInt()
+            val endLine = chapter.endPosition.toInt() + 1
 
             if (startLine >= 0 && endLine <= lines.size && startLine < endLine) {
                 return lines.subList(startLine, endLine).joinToString("\n")
