@@ -33,6 +33,8 @@ class DisplaySettingsService {
     private val displaySettingsFile: File by lazy {
         File(dataDir, StorageConstants.DISPLAY_SETTINGS_FILE)
     }
+
+    private val toolWindowHeaderVisibleKey = "${StorageConstants.TOOL_WINDOW_PREFIX}headerVisible"
     
     /**
      * 保存界面显示设置
@@ -48,6 +50,8 @@ class DisplaySettingsService {
             properties.setProperty("${StorageConstants.DISPLAY_PREFIX}statusBarAutoScroll", settings.statusBarAutoScroll.toString())
             properties.setProperty("${StorageConstants.DISPLAY_PREFIX}statusBarScrollInterval", settings.statusBarScrollInterval.toString())
             properties.setProperty("${StorageConstants.DISPLAY_PREFIX}backgroundColor", settings.backgroundColor)
+            properties.setProperty("${StorageConstants.DISPLAY_PREFIX}fontColor", settings.fontColor)
+            properties.setProperty("${StorageConstants.DISPLAY_PREFIX}autoContrastFontColor", settings.autoContrastFontColor.toString())
             
             saveProperties(properties, displaySettingsFile)
             logger.info("保存界面显示设置成功")
@@ -70,8 +74,21 @@ class DisplaySettingsService {
             val statusBarAutoScroll = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}statusBarAutoScroll")?.toBoolean() ?: DisplaySettings.DEFAULT.statusBarAutoScroll
             val statusBarScrollInterval = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}statusBarScrollInterval")?.toIntOrNull() ?: DisplaySettings.DEFAULT.statusBarScrollInterval
             val backgroundColor = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}backgroundColor") ?: DisplaySettings.DEFAULT.backgroundColor
+            val fontColor = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}fontColor") ?: DisplaySettings.DEFAULT.fontColor
+            val autoContrastFontColor = properties.getProperty("${StorageConstants.DISPLAY_PREFIX}autoContrastFontColor")?.toBoolean()
+                ?: DisplaySettings.DEFAULT.autoContrastFontColor
             
-            val settings = DisplaySettings(hideOperationPanel, hideTitleButton, hideProgressLabel, autoSaveProgress, statusBarAutoScroll, statusBarScrollInterval, backgroundColor)
+            val settings = DisplaySettings(
+                hideOperationPanel,
+                hideTitleButton,
+                hideProgressLabel,
+                autoSaveProgress,
+                statusBarAutoScroll,
+                statusBarScrollInterval,
+                backgroundColor,
+                fontColor,
+                autoContrastFontColor
+            )
             
             if (settings.isValid()) {
                 logger.info("加载界面显示设置成功")
@@ -92,9 +109,31 @@ class DisplaySettingsService {
     fun resetToDefault() {
         try {
             saveDisplaySettings(DisplaySettings.DEFAULT)
+            saveToolWindowHeaderVisible(true)
             logger.info("重置界面显示设置为默认值")
         } catch (e: Exception) {
             logger.error("重置界面显示设置失败", e)
+        }
+    }
+
+    fun saveToolWindowHeaderVisible(visible: Boolean) {
+        try {
+            val properties = loadProperties(displaySettingsFile)
+            properties.setProperty(toolWindowHeaderVisibleKey, visible.toString())
+            saveProperties(properties, displaySettingsFile)
+            logger.info("保存工具窗口顶部栏显示设置成功: $visible")
+        } catch (e: Exception) {
+            logger.error("保存工具窗口顶部栏显示设置失败", e)
+        }
+    }
+
+    fun loadToolWindowHeaderVisible(): Boolean {
+        return try {
+            val properties = loadProperties(displaySettingsFile)
+            properties.getProperty(toolWindowHeaderVisibleKey)?.toBoolean() ?: true
+        } catch (e: Exception) {
+            logger.error("加载工具窗口顶部栏显示设置失败，使用默认值", e)
+            true
         }
     }
     

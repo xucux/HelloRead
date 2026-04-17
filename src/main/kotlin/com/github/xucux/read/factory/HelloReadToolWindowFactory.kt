@@ -1,11 +1,16 @@
 package com.github.xucux.read.factory
 
+import com.github.xucux.read.action.OpenReadingSettingsGearAction
+import com.github.xucux.read.action.ToggleMainToolbarGearAction
 import com.github.xucux.read.constants.TabConstants
+import com.github.xucux.read.service.DisplaySettingsService
+import com.github.xucux.read.ui.ToolWindowHeaderVisibilityHelper
 import com.github.xucux.read.ui.BookReaderToolWindow
 import com.github.xucux.read.ui.BookshelfToolWindow
 import com.github.xucux.read.ui.ChapterListToolWindow
 import com.github.xucux.read.ui.SettingsToolWindow
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
@@ -17,19 +22,31 @@ import com.intellij.ui.content.ContentManagerEvent
  * 整合书架、阅读器、章节列表和设置功能
  */
 class HelloReadToolWindowFactory : ToolWindowFactory {
+
+    override fun init(toolWindow: ToolWindow) {
+        val headerVisible = DisplaySettingsService.getInstance().loadToolWindowHeaderVisible()
+        ToolWindowHeaderVisibilityHelper.apply(toolWindow, headerVisible)
+
+        val gearActions = DefaultActionGroup().apply {
+            add(OpenReadingSettingsGearAction())
+            add(ToggleMainToolbarGearAction())
+        }
+        toolWindow.setAdditionalGearActions(gearActions)
+        super.init(toolWindow)
+    }
     
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         // 创建各个组件
         val bookshelfToolWindow = BookshelfToolWindow(project)
         val bookReaderToolWindow = BookReaderToolWindow(project)
         val chapterListWindow = ChapterListToolWindow(project)
-        val settingWindows = SettingsToolWindow(project)
+//        val settingWindows = SettingsToolWindow(project)
         
         // 创建内容
-        val bookshelfContent = ContentFactory.SERVICE.getInstance().createContent(bookshelfToolWindow, TabConstants.BOOKSHELF_TAB, false)
-        val bookReaderContent = ContentFactory.SERVICE.getInstance().createContent(bookReaderToolWindow, TabConstants.READER_TAB, false)
-        val chapterListContent = ContentFactory.SERVICE.getInstance().createContent(chapterListWindow, TabConstants.CHAPTER_LIST_TAB, false)
-        val settingsContent = ContentFactory.SERVICE.getInstance().createContent(settingWindows, TabConstants.SETTINGS_TAB, false)
+        val bookshelfContent = ContentFactory.getInstance().createContent(bookshelfToolWindow, TabConstants.BOOKSHELF_TAB, false)
+        val bookReaderContent = ContentFactory.getInstance().createContent(bookReaderToolWindow, TabConstants.READER_TAB, false)
+        val chapterListContent = ContentFactory.getInstance().createContent(chapterListWindow, TabConstants.CHAPTER_LIST_TAB, false)
+//        val settingsContent = ContentFactory.getInstance().createContent(settingWindows, TabConstants.SETTINGS_TAB, false)
         
         // 添加ContentManagerListener来监听内容选择事件
         toolWindow.contentManager.addContentManagerListener(object : ContentManagerListener {
@@ -45,7 +62,7 @@ class HelloReadToolWindowFactory : ToolWindowFactory {
         toolWindow.contentManager.addContent(bookshelfContent)
         toolWindow.contentManager.addContent(bookReaderContent)
         toolWindow.contentManager.addContent(chapterListContent)
-        toolWindow.contentManager.addContent(settingsContent)
+//        toolWindow.contentManager.addContent(settingsContent)
     }
     
     override fun shouldBeAvailable(project: Project): Boolean = true

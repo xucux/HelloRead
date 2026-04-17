@@ -3,6 +3,7 @@ package com.github.xucux.read.ui
 import com.github.xucux.read.constants.TabConstants
 import com.github.xucux.read.model.Book
 import com.github.xucux.read.model.Chapter
+import com.github.xucux.read.model.DisplaySettings
 import com.github.xucux.read.model.FontSettings
 import com.github.xucux.read.model.ReadingRecord
 import com.github.xucux.read.model.ReadingMode
@@ -16,6 +17,7 @@ import com.intellij.ui.JBColor
 import javax.swing.text.*
 import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
+import java.awt.Color
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.event.ActionEvent
@@ -68,6 +70,8 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
     private var hideTitleButton = false
     private var hideProgressLabel = false
     private var backgroundColor = ""
+    private var fontColor = ""
+    private var autoContrastFontColor = true
     
     // 滚动自动加载相关
     private var isAutoLoading = false
@@ -448,7 +452,9 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
                 displaySettings.hideOperationPanel,
                 displaySettings.hideTitleButton,
                 displaySettings.hideProgressLabel,
-                displaySettings.backgroundColor
+                displaySettings.backgroundColor,
+                displaySettings.fontColor,
+                displaySettings.autoContrastFontColor
             )
             
             // 根据参数决定是否使用阅读记录
@@ -913,7 +919,9 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
             displaySettings.hideOperationPanel,
             displaySettings.hideTitleButton,
             displaySettings.hideProgressLabel,
-            displaySettings.backgroundColor
+            displaySettings.backgroundColor,
+            displaySettings.fontColor,
+            displaySettings.autoContrastFontColor
         )
     }
     
@@ -977,11 +985,20 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
     /**
      * 更新显示设置
      */
-    fun updateDisplaySettings(hideOperationPanel: Boolean, hideTitle: Boolean, hideProgress: Boolean, backgroundColor: String = "") {
+    fun updateDisplaySettings(
+        hideOperationPanel: Boolean,
+        hideTitle: Boolean,
+        hideProgress: Boolean,
+        backgroundColor: String = "",
+        fontColor: String = "",
+        autoContrastFontColor: Boolean = true
+    ) {
         this.hideOperationPanel = hideOperationPanel
         this.hideTitleButton = hideTitle
         this.hideProgressLabel = hideProgress
         this.backgroundColor = backgroundColor
+        this.fontColor = fontColor
+        this.autoContrastFontColor = autoContrastFontColor
         applyDisplaySettings()
     }
     
@@ -1000,6 +1017,7 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
         
         // 应用背景颜色设置
         applyBackgroundColor()
+        applyFontColor()
         
         // 重新布局
         revalidate()
@@ -1036,6 +1054,29 @@ class BookReaderToolWindow(private val project: Project) : SimpleToolWindowPanel
         // 设置内容区域背景色
         contentArea.background = bgColor
         contentArea.isOpaque = true
+    }
+
+    private fun applyFontColor() {
+        val effectiveFontColorHex = if (autoContrastFontColor) {
+            val bgHex = if (backgroundColor.isNotEmpty()) backgroundColor else DisplaySettings.getDefaultBackgroundColor()
+            DisplaySettings.getRecommendedFontColor(bgHex)
+        } else {
+            fontColor
+        }
+        val fgColor = if (effectiveFontColorHex.isEmpty()) {
+            try {
+                if (JBColor.isBright()) Color.decode(DisplaySettings.LIGHT_THEME_FONT) else Color.decode(DisplaySettings.DARK_THEME_FONT)
+            } catch (e: Exception) {
+                JBColor.foreground()
+            }
+        } else {
+            try {
+                Color.decode(effectiveFontColorHex)
+            } catch (e: Exception) {
+                JBColor.foreground()
+            }
+        }
+        contentArea.foreground = fgColor
     }
     
     /**
