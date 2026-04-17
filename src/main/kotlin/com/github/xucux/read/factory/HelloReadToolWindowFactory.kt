@@ -1,7 +1,10 @@
 package com.github.xucux.read.factory
 
 import com.github.xucux.read.action.OpenReadingSettingsGearAction
+import com.github.xucux.read.action.ToggleMainToolbarGearAction
 import com.github.xucux.read.constants.TabConstants
+import com.github.xucux.read.service.DisplaySettingsService
+import com.github.xucux.read.ui.ToolWindowHeaderVisibilityHelper
 import com.github.xucux.read.ui.BookReaderToolWindow
 import com.github.xucux.read.ui.BookshelfToolWindow
 import com.github.xucux.read.ui.ChapterListToolWindow
@@ -21,8 +24,12 @@ import com.intellij.ui.content.ContentManagerEvent
 class HelloReadToolWindowFactory : ToolWindowFactory {
 
     override fun init(toolWindow: ToolWindow) {
+        val headerVisible = DisplaySettingsService.getInstance().loadToolWindowHeaderVisible()
+        ToolWindowHeaderVisibilityHelper.apply(toolWindow, headerVisible)
+
         val gearActions = DefaultActionGroup().apply {
             add(OpenReadingSettingsGearAction())
+            add(ToggleMainToolbarGearAction())
         }
         toolWindow.setAdditionalGearActions(gearActions)
         super.init(toolWindow)

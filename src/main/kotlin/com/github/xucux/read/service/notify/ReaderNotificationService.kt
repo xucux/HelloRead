@@ -38,7 +38,9 @@ class ReaderNotificationService(private val project: Project) {
         hideOperationPanel: Boolean,
         hideTitleButton: Boolean,
         hideProgressLabel: Boolean,
-        backgroundColor: String = ""
+        backgroundColor: String = "",
+        fontColor: String = "",
+        autoContrastFontColor: Boolean = true
     ) {
         try {
             val toolWindowManager = com.intellij.openapi.wm.ToolWindowManager.getInstance(project)
@@ -53,7 +55,9 @@ class ReaderNotificationService(private val project: Project) {
                         hideOperationPanel,
                         hideTitleButton,
                         hideProgressLabel,
-                        backgroundColor
+                        backgroundColor,
+                        fontColor,
+                        autoContrastFontColor
                     )
                 }
             }

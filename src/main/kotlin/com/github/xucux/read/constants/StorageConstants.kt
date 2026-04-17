@@ -30,6 +30,7 @@ object StorageConstants {
     const val COLUMN_PREFIX = "column."
     const val FONT_PREFIX = "font."
     const val DISPLAY_PREFIX = "display."
+    const val TOOL_WINDOW_PREFIX = "toolWindow."
     
     // 章节缓存相关
     const val CHAPTER_COUNT_KEY = "count"

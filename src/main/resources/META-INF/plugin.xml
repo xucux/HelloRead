@@ -59,6 +59,7 @@
     <p>Open reader <code>Ctrl+Alt+Numpad 1</code> to start reading.</p>
     <p>Previous Chapter: <code>Alt+Numpad 4</code>, Next Chapter: <code>Alt+Numpad 6</code>, Close Reader: <code>Ctrl+Alt+Numpad 0</code></p>
     <p>Scroll Up/Previous Line: <code>Alt+Numpad 8</code>, Scroll Down/Next Line: <code>Alt+Numpad 2</code></p>
+    <p>Toggle Top Bar: <code>Alt+Numpad 5</code></p>
     <hr>
     
     <h3>HelloRead</h3>
@@ -85,6 +86,7 @@
     <p>打开阅读器，<code>Ctrl+Alt+Numpad 1</code> 开始阅读。</p>
     <p>上一章：<code>Alt+Numpad 4</code>，下一章：<code>Alt+Numpad 6</code>，关闭阅读器：<code>Ctrl+Alt+Numpad 0</code></p>
     <p>向上滚动/上一行：<code>Alt+Numpad 8</code>，向下滚动/下一行：<code>Alt+Numpad 2</code></p>
+    <p>隐藏/显示顶部栏：<code>Alt+Numpad 5</code></p>
     <p></p>
     ]]></description>
 
@@ -218,6 +220,14 @@
                     text="下一章"
                     description="跳转到下一章">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD6"/>
+            </action>
+
+            <!-- 切换HelloRead顶部栏显示 -->
+            <action id="ReadBook.ToggleHelloReadTopBar"
+                    class="com.github.xucux.read.action.ToggleMainToolbarGearAction"
+                    text="隐藏/显示顶部栏"
+                    description="切换HelloRead工具窗口顶部栏显示状态">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt NUMPAD5"/>
             </action>
             
             <!-- 向上滚动快捷键 -->

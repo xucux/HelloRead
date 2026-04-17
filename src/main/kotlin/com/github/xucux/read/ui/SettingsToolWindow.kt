@@ -53,6 +53,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     private lateinit var hideTitleButtonCheckBox: JBCheckBox
     private lateinit var hideProgressLabelCheckBox: JBCheckBox
     private lateinit var autoSaveProgressCheckBox: JBCheckBox
+    private lateinit var autoContrastFontColorCheckBox: JBCheckBox
     private lateinit var statusBarAutoScrollCheckBox: JBCheckBox
     private lateinit var statusBarScrollIntervalField: JBTextField
     
@@ -63,6 +64,12 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     private lateinit var lightPresetRadio: JRadioButton
     private lateinit var darkPresetSwatch: JBLabel
     private lateinit var lightPresetSwatch: JBLabel
+    private lateinit var fontColorButton: JButton
+    private lateinit var fontColorPreview: JBLabel
+    private lateinit var darkFontPresetRadio: JRadioButton
+    private lateinit var lightFontPresetRadio: JRadioButton
+    private lateinit var darkFontPresetSwatch: JBLabel
+    private lateinit var lightFontPresetSwatch: JBLabel
     
     
     private var currentFontSettings: FontSettings = FontSettings.DEFAULT
@@ -243,6 +250,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         autoSaveProgressCheckBox.isSelected = true
         gbc.gridy = 3
         optionsPanel.add(autoSaveProgressCheckBox, gbc)
+        autoContrastFontColorCheckBox = JBCheckBox("字体颜色自动对比背景")
         
         statusBarAutoScrollCheckBox = JBCheckBox("底部状态栏自动滚动")
         statusBarScrollIntervalField = JBTextField()
@@ -254,12 +262,18 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
 
         backgroundColorPreview = JBLabel("  ")
         backgroundColorButton = JButton("选择颜色")
+        fontColorButton = JButton("选择颜色")
+        fontColorPreview = JBLabel()
         initColorControls()
 
         darkPresetRadio = JRadioButton("深色")
         lightPresetRadio = JRadioButton("浅色")
         darkPresetSwatch = JBLabel()
         lightPresetSwatch = JBLabel()
+        darkFontPresetRadio = JRadioButton("浅色字")
+        lightFontPresetRadio = JRadioButton("深色字")
+        darkFontPresetSwatch = JBLabel()
+        lightFontPresetSwatch = JBLabel()
         initPresetColorOptions()
 
         val colorRowPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT, JBUI.scale(8), 0)).apply {
@@ -270,6 +284,19 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         gbc.gridy = 4
         gbc.insets = JBUI.insetsTop(6)
         optionsPanel.add(colorRowPanel, gbc)
+
+        val fontColorRowPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT, JBUI.scale(8), 0)).apply {
+            border = JBUI.Borders.empty()
+            add(JBLabel("阅读器字体色:"))
+            add(createFontColorSelectionPanel())
+        }
+        gbc.gridy = 5
+        gbc.insets = JBUI.insetsTop(4)
+        optionsPanel.add(fontColorRowPanel, gbc)
+
+        gbc.gridy = 6
+        gbc.insets = JBUI.insetsTop(2)
+        optionsPanel.add(autoContrastFontColorCheckBox, gbc)
         
         // 将选项面板添加到主面板的中心
         panel.add(optionsPanel, BorderLayout.CENTER)
@@ -311,7 +338,10 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
             readerNotificationService.notifyReaderUpdateDisplay(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
-                hideProgressLabelCheckBox.isSelected
+                hideProgressLabelCheckBox.isSelected,
+                String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF),
+                String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF),
+                autoContrastFontColorCheckBox.isSelected
             )
         }
         
@@ -320,7 +350,10 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
             readerNotificationService.notifyReaderUpdateDisplay(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
-                hideProgressLabelCheckBox.isSelected
+                hideProgressLabelCheckBox.isSelected,
+                String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF),
+                String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF),
+                autoContrastFontColorCheckBox.isSelected
             )
         }
         
@@ -329,12 +362,28 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
             readerNotificationService.notifyReaderUpdateDisplay(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
-                hideProgressLabelCheckBox.isSelected
+                hideProgressLabelCheckBox.isSelected,
+                String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF),
+                String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF),
+                autoContrastFontColorCheckBox.isSelected
             )
         }
         
         autoSaveProgressCheckBox.addActionListener {
             saveDisplaySettings()
+        }
+        autoContrastFontColorCheckBox.addActionListener {
+            updateFontColorControlsEnabledState()
+            refreshFontColorByBackgroundIfAuto()
+            saveDisplaySettings()
+            readerNotificationService.notifyReaderUpdateDisplay(
+                hideOperationPanelCheckBox.isSelected,
+                hideTitleButtonCheckBox.isSelected,
+                hideProgressLabelCheckBox.isSelected,
+                String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF),
+                String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF),
+                autoContrastFontColorCheckBox.isSelected
+            )
         }
         
 //        statusBarAutoScrollCheckBox.addActionListener {
@@ -350,6 +399,9 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         backgroundColorButton.addActionListener {
             showColorChooser()
         }
+        fontColorButton.addActionListener {
+            showFontColorChooser()
+        }
         
         darkPresetRadio.addActionListener {
             if (darkPresetRadio.isSelected) {
@@ -359,6 +411,16 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         lightPresetRadio.addActionListener {
             if (lightPresetRadio.isSelected) {
                 setPresetColor(DisplaySettings.LIGHT_THEME_BACKGROUND)
+            }
+        }
+        darkFontPresetRadio.addActionListener {
+            if (darkFontPresetRadio.isSelected) {
+                setPresetFontColor(DisplaySettings.DARK_THEME_FONT)
+            }
+        }
+        lightFontPresetRadio.addActionListener {
+            if (lightFontPresetRadio.isSelected) {
+                setPresetFontColor(DisplaySettings.LIGHT_THEME_FONT)
             }
         }
         
@@ -464,11 +526,14 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         hideTitleButtonCheckBox.isSelected = currentDisplaySettings.hideTitleButton
         hideProgressLabelCheckBox.isSelected = currentDisplaySettings.hideProgressLabel
         autoSaveProgressCheckBox.isSelected = currentDisplaySettings.autoSaveProgress
+        autoContrastFontColorCheckBox.isSelected = currentDisplaySettings.autoContrastFontColor
         statusBarAutoScrollCheckBox.isSelected = currentDisplaySettings.statusBarAutoScroll
         statusBarScrollIntervalField.text = currentDisplaySettings.statusBarScrollInterval.toString()
         
         // 加载背景颜色设置
         loadBackgroundColorSettings()
+        updateFontColorControlsEnabledState()
+        refreshFontColorByBackgroundIfAuto()
     }
 
     /**
@@ -478,6 +543,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         try {
             // 创建新的显示设置对象
             val backgroundColor = String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF)
+            val fontColor = String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF)
             val newDisplaySettings = DisplaySettings(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
@@ -486,7 +552,9 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
                 // 暂时下线项：沿用当前值，避免隐藏后意外覆盖。
                 currentDisplaySettings.statusBarAutoScroll,
                 currentDisplaySettings.statusBarScrollInterval,
-                backgroundColor
+                backgroundColor,
+                fontColor,
+                autoContrastFontColorCheckBox.isSelected
             )
             
             // 保存到存储
@@ -503,15 +571,26 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
      */
     private fun loadBackgroundColorSettings() {
         val backgroundColor = currentDisplaySettings.backgroundColor
+        val fontColor = currentDisplaySettings.fontColor
         try {
             val color = Color.decode(backgroundColor)
-            backgroundColorPreview.background = color
+            applyBackgroundToPreview(color)
             updatePresetSelection(color)
         } catch (e: Exception) {
             // 如果颜色解析失败，使用默认颜色
             val defaultColor = Color.decode(DisplaySettings.DEFAULT.backgroundColor)
-            backgroundColorPreview.background = defaultColor
+            applyBackgroundToPreview(defaultColor)
             updatePresetSelection(defaultColor)
+        }
+
+        try {
+            val color = Color.decode(fontColor)
+            applyFontColorToPreview(color)
+            updateFontPresetSelection(color)
+        } catch (e: Exception) {
+            val defaultColor = Color.decode(DisplaySettings.DEFAULT.fontColor)
+            applyFontColorToPreview(defaultColor)
+            updateFontPresetSelection(defaultColor)
         }
     }
     
@@ -527,14 +606,17 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         )
         
         if (selectedColor != null) {
-            backgroundColorPreview.background = selectedColor
+            applyBackgroundToPreview(selectedColor)
+            refreshFontColorByBackgroundIfAuto()
             updatePresetSelection(selectedColor)
             saveDisplaySettings()
             readerNotificationService.notifyReaderUpdateDisplay(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
                 hideProgressLabelCheckBox.isSelected,
-                String.format("#%06X", selectedColor.rgb and 0xFFFFFF)
+                String.format("#%06X", selectedColor.rgb and 0xFFFFFF),
+                String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF),
+                autoContrastFontColorCheckBox.isSelected
             )
         }
     }
@@ -545,15 +627,95 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     private fun setPresetColor(colorHex: String) {
         try {
             val color = Color.decode(colorHex)
-            backgroundColorPreview.background = color
+            applyBackgroundToPreview(color)
+            refreshFontColorByBackgroundIfAuto()
             updatePresetSelection(color)
             saveDisplaySettings()
             readerNotificationService.notifyReaderUpdateDisplay(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
                 hideProgressLabelCheckBox.isSelected,
-                colorHex
+                colorHex,
+                String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF),
+                autoContrastFontColorCheckBox.isSelected
             )
+        } catch (e: Exception) {
+            // 忽略颜色解析错误
+        }
+    }
+
+    private fun showFontColorChooser() {
+        val currentColor = fontColorPreview.foreground
+        val selectedColor = JColorChooser.showDialog(
+            fontColorButton,
+            "选择字体颜色",
+            currentColor
+        )
+
+        if (selectedColor != null) {
+            applyFontColorToPreview(selectedColor)
+            updateFontPresetSelection(selectedColor)
+            saveDisplaySettings()
+            readerNotificationService.notifyReaderUpdateDisplay(
+                hideOperationPanelCheckBox.isSelected,
+                hideTitleButtonCheckBox.isSelected,
+                hideProgressLabelCheckBox.isSelected,
+                String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF),
+                String.format("#%06X", selectedColor.rgb and 0xFFFFFF),
+                autoContrastFontColorCheckBox.isSelected
+            )
+        }
+    }
+
+    private fun setPresetFontColor(colorHex: String) {
+        try {
+            val color = Color.decode(colorHex)
+            applyFontColorToPreview(color)
+            updateFontPresetSelection(color)
+            saveDisplaySettings()
+            readerNotificationService.notifyReaderUpdateDisplay(
+                hideOperationPanelCheckBox.isSelected,
+                hideTitleButtonCheckBox.isSelected,
+                hideProgressLabelCheckBox.isSelected,
+                String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF),
+                colorHex,
+                autoContrastFontColorCheckBox.isSelected
+            )
+        } catch (e: Exception) {
+            // 忽略颜色解析错误
+        }
+    }
+
+    /**
+     * 背景色在「配置预览色块」与「预览文本域」上保持同步。
+     */
+    private fun applyBackgroundToPreview(color: Color) {
+        backgroundColorPreview.background = color
+        previewArea.background = color
+    }
+
+    private fun applyFontColorToPreview(color: Color) {
+        fontColorPreview.foreground = color
+        previewArea.foreground = color
+    }
+
+    private fun updateFontColorControlsEnabledState() {
+        val manualEnabled = !autoContrastFontColorCheckBox.isSelected
+        fontColorButton.isEnabled = manualEnabled
+        darkFontPresetRadio.isEnabled = manualEnabled
+        lightFontPresetRadio.isEnabled = manualEnabled
+    }
+
+    private fun refreshFontColorByBackgroundIfAuto() {
+        if (!autoContrastFontColorCheckBox.isSelected) {
+            return
+        }
+        val backgroundHex = String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF)
+        val recommendedHex = DisplaySettings.getRecommendedFontColor(backgroundHex)
+        try {
+            val color = Color.decode(recommendedHex)
+            applyFontColorToPreview(color)
+            updateFontPresetSelection(color)
         } catch (e: Exception) {
             // 忽略颜色解析错误
         }
@@ -604,12 +766,23 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         backgroundColorPreview.preferredSize = java.awt.Dimension(22, 18)
         backgroundColorPreview.minimumSize = java.awt.Dimension(22, 18)
         backgroundColorPreview.isOpaque = true
+        fontColorPreview.text = "A"
+        fontColorPreview.border = JBUI.Borders.customLine(Color.GRAY)
+        fontColorPreview.preferredSize = java.awt.Dimension(22, 18)
+        fontColorPreview.minimumSize = java.awt.Dimension(22, 18)
+        fontColorPreview.isOpaque = true
+        fontColorPreview.horizontalAlignment = SwingConstants.CENTER
+        // 预置为“之前的默认字体色”（随IDE主题）。
+        fontColorPreview.foreground = Color.decode(DisplaySettings.getDefaultFontColor())
     }
 
     private fun initPresetColorOptions() {
         val presetGroup = ButtonGroup()
         presetGroup.add(darkPresetRadio)
         presetGroup.add(lightPresetRadio)
+        val fontPresetGroup = ButtonGroup()
+        fontPresetGroup.add(darkFontPresetRadio)
+        fontPresetGroup.add(lightFontPresetRadio)
 
         darkPresetSwatch.background = Color.decode(DisplaySettings.DARK_THEME_BACKGROUND)
         darkPresetSwatch.isOpaque = true
@@ -624,6 +797,20 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         lightPresetSwatch.preferredSize = java.awt.Dimension(16, 16)
         lightPresetSwatch.minimumSize = lightPresetSwatch.preferredSize
         lightPresetSwatch.toolTipText = "浅色背景 (${DisplaySettings.LIGHT_THEME_BACKGROUND})"
+
+        darkFontPresetSwatch.background = Color.decode(DisplaySettings.DARK_THEME_FONT)
+        darkFontPresetSwatch.isOpaque = true
+        darkFontPresetSwatch.border = JBUI.Borders.customLine(Color.GRAY)
+        darkFontPresetSwatch.preferredSize = java.awt.Dimension(16, 16)
+        darkFontPresetSwatch.minimumSize = darkFontPresetSwatch.preferredSize
+        darkFontPresetSwatch.toolTipText = "浅色字 (${DisplaySettings.DARK_THEME_FONT})"
+
+        lightFontPresetSwatch.background = Color.decode(DisplaySettings.LIGHT_THEME_FONT)
+        lightFontPresetSwatch.isOpaque = true
+        lightFontPresetSwatch.border = JBUI.Borders.customLine(Color.GRAY)
+        lightFontPresetSwatch.preferredSize = java.awt.Dimension(16, 16)
+        lightFontPresetSwatch.minimumSize = lightFontPresetSwatch.preferredSize
+        lightFontPresetSwatch.toolTipText = "深色字 (${DisplaySettings.LIGHT_THEME_FONT})"
     }
 
     private fun createColorSelectionPanel(): JComponent {
@@ -634,6 +821,17 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         panel.add(JBLabel("预设"))
         panel.add(createPresetOption(darkPresetRadio, darkPresetSwatch))
         panel.add(createPresetOption(lightPresetRadio, lightPresetSwatch))
+        return panel
+    }
+
+    private fun createFontColorSelectionPanel(): JComponent {
+        val panel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT, JBUI.scale(8), 0))
+        panel.border = JBUI.Borders.empty()
+        panel.add(fontColorPreview)
+        panel.add(fontColorButton)
+        panel.add(JBLabel("预设"))
+        panel.add(createPresetOption(darkFontPresetRadio, darkFontPresetSwatch))
+        panel.add(createPresetOption(lightFontPresetRadio, lightFontPresetSwatch))
         return panel
     }
 
@@ -683,6 +881,18 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
             else -> {
                 darkPresetRadio.isSelected = false
                 lightPresetRadio.isSelected = false
+            }
+        }
+    }
+
+    private fun updateFontPresetSelection(color: Color) {
+        val normalizedColor = String.format("#%06X", color.rgb and 0xFFFFFF)
+        when {
+            normalizedColor.equals(DisplaySettings.DARK_THEME_FONT, ignoreCase = true) -> darkFontPresetRadio.isSelected = true
+            normalizedColor.equals(DisplaySettings.LIGHT_THEME_FONT, ignoreCase = true) -> lightFontPresetRadio.isSelected = true
+            else -> {
+                darkFontPresetRadio.isSelected = false
+                lightFontPresetRadio.isSelected = false
             }
         }
     }

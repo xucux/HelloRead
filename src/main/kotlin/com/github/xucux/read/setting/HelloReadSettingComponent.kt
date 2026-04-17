@@ -1,15 +1,20 @@
 package com.github.xucux.read.setting
 
+import com.github.xucux.read.constants.StorageConstants
+import com.github.xucux.read.constants.TabConstants
 import com.github.xucux.read.model.DisplaySettings
 import com.github.xucux.read.model.FontSettings
 import com.github.xucux.read.service.DisplaySettingsService
 import com.github.xucux.read.service.FontSettingsService
 import com.github.xucux.read.service.notify.ReaderNotificationService
+import com.github.xucux.read.ui.ToolWindowHeaderVisibilityHelper
+import com.intellij.ui.JBColor
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.options.SearchableConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
@@ -18,6 +23,7 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import java.awt.Color
+import java.awt.Component
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.Font
@@ -57,6 +63,8 @@ class HelloReadSettingComponent : SearchableConfigurable {
     private val hideTitleButtonCheckBox = JBCheckBox("隐藏阅读界面的标题按钮")
     private val hideProgressLabelCheckBox = JBCheckBox("隐藏阅读界面的进度标签")
     private val autoSaveProgressCheckBox = JBCheckBox("自动保存阅读进度")
+    private val showToolWindowHeaderCheckBox = JBCheckBox("显示HelloRead顶部栏")
+    private val autoContrastFontColorCheckBox = JBCheckBox("字体颜色自动对比背景")
     private val statusBarAutoScrollCheckBox = JBCheckBox("底部状态栏自动滚动")
     private val statusBarScrollIntervalField = JBTextField()
     
@@ -67,12 +75,20 @@ class HelloReadSettingComponent : SearchableConfigurable {
     private val lightPresetRadio = JRadioButton("浅色")
     private val darkPresetSwatch = JBLabel()
     private val lightPresetSwatch = JBLabel()
+    private val fontColorButton = JButton("选择颜色")
+    private val fontColorPreview = JBLabel()
+    private val darkFontPresetRadio = JRadioButton("浅色字")
+    private val lightFontPresetRadio = JRadioButton("深色字")
+    private val darkFontPresetSwatch = JBLabel()
+    private val lightFontPresetSwatch = JBLabel()
     
     // 当前设置
     private var currentFontSettings: FontSettings = fontSettingsService.loadFontSettings()
     private var originalFontSettings: FontSettings = currentFontSettings
     private var currentDisplaySettings: DisplaySettings = displaySettingsService.loadDisplaySettings()
     private var originalDisplaySettings: DisplaySettings = currentDisplaySettings
+    private var currentToolWindowHeaderVisible: Boolean = displaySettingsService.loadToolWindowHeaderVisible()
+    private var originalToolWindowHeaderVisible: Boolean = currentToolWindowHeaderVisible
     
     private val previewText: String = "这是字体预览文本。\n\n" +
                 "在这里可以看到字体设置的效果。\n" +
@@ -86,6 +102,13 @@ class HelloReadSettingComponent : SearchableConfigurable {
 
     override fun createComponent(): JComponent? {
         val contentBox = Box.createVerticalBox()
+        val storagePathHint = JBLabel(
+            "配置文件位置: ${System.getProperty("user.home")}${java.io.File.separator}${StorageConstants.READBOOK_DATA_DIR} " +
+                "(颜色相关保存于 ${StorageConstants.DISPLAY_SETTINGS_FILE})"
+        ).apply {
+            foreground = JBColor.GRAY
+            border = JBUI.Borders.emptyTop(8)
+        }
         contentBox.add(createFontPreviewSplitPanel())
         // 分区之间保留视觉呼吸感，避免设置项紧贴。
         contentBox.add(Box.createVerticalStrut(JBUI.scale(16)))
@@ -96,6 +119,9 @@ class HelloReadSettingComponent : SearchableConfigurable {
         contentPanel.border = JBUI.Borders.empty(12, 16)
         // 固定从顶部开始堆叠，避免在大窗口中垂直居中。
         contentPanel.add(contentBox, BorderLayout.NORTH)
+        contentPanel.add(JBPanel<JBPanel<*>>(BorderLayout()).apply {
+            add(storagePathHint, BorderLayout.WEST)
+        }, BorderLayout.SOUTH)
 
         val scrollPane = JBScrollPane(contentPanel)
         scrollPane.border = JBUI.Borders.empty()
@@ -143,6 +169,8 @@ class HelloReadSettingComponent : SearchableConfigurable {
         optionsPanel.add(hideProgressLabelCheckBox, gbc)
         gbc.gridy = 3
         optionsPanel.add(autoSaveProgressCheckBox, gbc)
+        gbc.gridy = 4
+        optionsPanel.add(showToolWindowHeaderCheckBox, gbc)
 //        gbc.gridy = 4
 //        optionsPanel.add(statusBarAutoScrollCheckBox, gbc)
 //
@@ -155,9 +183,22 @@ class HelloReadSettingComponent : SearchableConfigurable {
             add(JBLabel("阅读器背景色:"))
             add(createColorSelectionPanel())
         }
-        gbc.gridy = 4
+        gbc.gridy = 5
         gbc.insets = JBUI.insetsTop(6)
         optionsPanel.add(colorRowPanel, gbc)
+
+        val fontColorRowPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT, JBUI.scale(8), 0)).apply {
+            border = JBUI.Borders.empty()
+            add(JBLabel("阅读器字体色:"))
+            add(createFontColorSelectionPanel())
+        }
+        gbc.gridy = 6
+        gbc.insets = JBUI.insetsTop(4)
+        optionsPanel.add(fontColorRowPanel, gbc)
+
+        gbc.gridy = 7
+        gbc.insets = JBUI.insetsTop(2)
+        optionsPanel.add(autoContrastFontColorCheckBox, gbc)
         return FormBuilder.createFormBuilder()
             .addComponent(JBLabel("界面显示选项"))
             .addComponent(Box.createVerticalStrut(JBUI.scale(6)) as JComponent)
@@ -299,6 +340,8 @@ class HelloReadSettingComponent : SearchableConfigurable {
         hideTitleButtonCheckBox.isSelected = currentDisplaySettings.hideTitleButton
         hideProgressLabelCheckBox.isSelected = currentDisplaySettings.hideProgressLabel
         autoSaveProgressCheckBox.isSelected = currentDisplaySettings.autoSaveProgress
+        showToolWindowHeaderCheckBox.isSelected = currentToolWindowHeaderVisible
+        autoContrastFontColorCheckBox.isSelected = currentDisplaySettings.autoContrastFontColor
         statusBarAutoScrollCheckBox.isSelected = currentDisplaySettings.statusBarAutoScroll
         statusBarScrollIntervalField.text = currentDisplaySettings.statusBarScrollInterval.toString()
         
@@ -319,10 +362,16 @@ class HelloReadSettingComponent : SearchableConfigurable {
         hideTitleButtonCheckBox.addActionListener { /* 设置变化时不需要特殊处理 */ }
         hideProgressLabelCheckBox.addActionListener { /* 设置变化时不需要特殊处理 */ }
         autoSaveProgressCheckBox.addActionListener { /* 设置变化时不需要特殊处理 */ }
+        showToolWindowHeaderCheckBox.addActionListener { /* 设置变化时不需要特殊处理 */ }
+        autoContrastFontColorCheckBox.addActionListener {
+            updateFontColorControlsEnabledState()
+            refreshFontColorByBackgroundIfAuto()
+        }
 //        statusBarAutoScrollCheckBox.addActionListener { updateStatusBarIntervalEnabledState() }
         
         // 添加背景颜色设置事件监听器
         backgroundColorButton.addActionListener { showColorChooser() }
+        fontColorButton.addActionListener { showFontColorChooser() }
         
         // 预设颜色单选事件监听器
         darkPresetRadio.addActionListener {
@@ -335,12 +384,24 @@ class HelloReadSettingComponent : SearchableConfigurable {
                 setPresetColor(DisplaySettings.LIGHT_THEME_BACKGROUND)
             }
         }
+        darkFontPresetRadio.addActionListener {
+            if (darkFontPresetRadio.isSelected) {
+                setPresetFontColor(DisplaySettings.DARK_THEME_FONT)
+            }
+        }
+        lightFontPresetRadio.addActionListener {
+            if (lightFontPresetRadio.isSelected) {
+                setPresetFontColor(DisplaySettings.LIGHT_THEME_FONT)
+            }
+        }
         
         // 初始预览
         updatePreview()
         
         // 初始编辑模式
         togglePreviewEditMode()
+        updateFontColorControlsEnabledState()
+        refreshFontColorByBackgroundIfAuto()
 //        updateStatusBarIntervalEnabledState()
     }
 
@@ -426,6 +487,9 @@ class HelloReadSettingComponent : SearchableConfigurable {
         val presetGroup = ButtonGroup()
         presetGroup.add(darkPresetRadio)
         presetGroup.add(lightPresetRadio)
+        val fontPresetGroup = ButtonGroup()
+        fontPresetGroup.add(darkFontPresetRadio)
+        fontPresetGroup.add(lightFontPresetRadio)
 
         darkPresetSwatch.background = Color.decode(DisplaySettings.DARK_THEME_BACKGROUND)
         darkPresetSwatch.isOpaque = true
@@ -440,6 +504,29 @@ class HelloReadSettingComponent : SearchableConfigurable {
         lightPresetSwatch.preferredSize = java.awt.Dimension(16, 16)
         lightPresetSwatch.minimumSize = lightPresetSwatch.preferredSize
         lightPresetSwatch.toolTipText = "浅色背景 (${DisplaySettings.LIGHT_THEME_BACKGROUND})"
+
+        fontColorPreview.text = "A"
+        fontColorPreview.border = JBUI.Borders.customLine(Color.GRAY)
+        fontColorPreview.preferredSize = java.awt.Dimension(22, 18)
+        fontColorPreview.minimumSize = java.awt.Dimension(22, 18)
+        fontColorPreview.isOpaque = true
+        fontColorPreview.horizontalAlignment = SwingConstants.CENTER
+        // 预置为“之前的默认字体色”（随IDE主题）。
+        fontColorPreview.foreground = Color.decode(DisplaySettings.getDefaultFontColor())
+
+        darkFontPresetSwatch.background = Color.decode(DisplaySettings.DARK_THEME_FONT)
+        darkFontPresetSwatch.isOpaque = true
+        darkFontPresetSwatch.border = JBUI.Borders.customLine(Color.GRAY)
+        darkFontPresetSwatch.preferredSize = java.awt.Dimension(16, 16)
+        darkFontPresetSwatch.minimumSize = darkFontPresetSwatch.preferredSize
+        darkFontPresetSwatch.toolTipText = "浅色字 (${DisplaySettings.DARK_THEME_FONT})"
+
+        lightFontPresetSwatch.background = Color.decode(DisplaySettings.LIGHT_THEME_FONT)
+        lightFontPresetSwatch.isOpaque = true
+        lightFontPresetSwatch.border = JBUI.Borders.customLine(Color.GRAY)
+        lightFontPresetSwatch.preferredSize = java.awt.Dimension(16, 16)
+        lightFontPresetSwatch.minimumSize = lightFontPresetSwatch.preferredSize
+        lightFontPresetSwatch.toolTipText = "深色字 (${DisplaySettings.LIGHT_THEME_FONT})"
     }
 
     private fun createColorSelectionPanel(): JComponent {
@@ -451,6 +538,17 @@ class HelloReadSettingComponent : SearchableConfigurable {
         panel.add(JBLabel("预设"))
         panel.add(createPresetOption(darkPresetRadio, darkPresetSwatch))
         panel.add(createPresetOption(lightPresetRadio, lightPresetSwatch))
+        return panel
+    }
+
+    private fun createFontColorSelectionPanel(): JComponent {
+        val panel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT, JBUI.scale(8), 0))
+        panel.border = JBUI.Borders.empty()
+        panel.add(fontColorPreview)
+        panel.add(fontColorButton)
+        panel.add(JBLabel("预设"))
+        panel.add(createPresetOption(darkFontPresetRadio, darkFontPresetSwatch))
+        panel.add(createPresetOption(lightFontPresetRadio, lightFontPresetSwatch))
         return panel
     }
 
@@ -508,15 +606,26 @@ class HelloReadSettingComponent : SearchableConfigurable {
      */
     private fun loadBackgroundColorSettings() {
         val backgroundColor = currentDisplaySettings.backgroundColor
+        val fontColor = currentDisplaySettings.fontColor
         try {
             val color = Color.decode(backgroundColor)
-            backgroundColorPreview.background = color
+            applyBackgroundToPreview(color)
             updatePresetSelection(color)
         } catch (e: Exception) {
             // 如果颜色解析失败，使用默认颜色
             val defaultColor = Color.decode(DisplaySettings.DEFAULT.backgroundColor)
-            backgroundColorPreview.background = defaultColor
+            applyBackgroundToPreview(defaultColor)
             updatePresetSelection(defaultColor)
+        }
+
+        try {
+            val color = Color.decode(fontColor)
+            applyFontColorToPreview(color)
+            updateFontPresetSelection(color)
+        } catch (e: Exception) {
+            val defaultColor = Color.decode(DisplaySettings.DEFAULT.fontColor)
+            applyFontColorToPreview(defaultColor)
+            updateFontPresetSelection(defaultColor)
         }
     }
     
@@ -532,8 +641,23 @@ class HelloReadSettingComponent : SearchableConfigurable {
         )
         
         if (selectedColor != null) {
-            backgroundColorPreview.background = selectedColor
+            applyBackgroundToPreview(selectedColor)
+            refreshFontColorByBackgroundIfAuto()
             updatePresetSelection(selectedColor)
+        }
+    }
+
+    private fun showFontColorChooser() {
+        val currentColor = fontColorPreview.foreground
+        val selectedColor = JColorChooser.showDialog(
+            fontColorButton,
+            "选择字体颜色",
+            currentColor
+        )
+
+        if (selectedColor != null) {
+            applyFontColorToPreview(selectedColor)
+            updateFontPresetSelection(selectedColor)
         }
     }
     
@@ -543,11 +667,51 @@ class HelloReadSettingComponent : SearchableConfigurable {
     private fun setPresetColor(colorHex: String) {
         try {
             val color = Color.decode(colorHex)
-            backgroundColorPreview.background = color
+            applyBackgroundToPreview(color)
+            refreshFontColorByBackgroundIfAuto()
             updatePresetSelection(color)
         } catch (e: Exception) {
             // 忽略颜色解析错误
         }
+    }
+
+    private fun setPresetFontColor(colorHex: String) {
+        try {
+            val color = Color.decode(colorHex)
+            applyFontColorToPreview(color)
+            updateFontPresetSelection(color)
+        } catch (e: Exception) {
+            // 忽略颜色解析错误
+        }
+    }
+
+    /**
+     * 背景色在「配置预览色块」与「预览文本域」上保持同步。
+     */
+    private fun applyBackgroundToPreview(color: Color) {
+        backgroundColorPreview.background = color
+        previewArea.background = color
+    }
+
+    private fun applyFontColorToPreview(color: Color) {
+        fontColorPreview.foreground = color
+        previewArea.foreground = color
+    }
+
+    private fun updateFontColorControlsEnabledState() {
+        val manualEnabled = !autoContrastFontColorCheckBox.isSelected
+        fontColorButton.isEnabled = manualEnabled
+        darkFontPresetRadio.isEnabled = manualEnabled
+        lightFontPresetRadio.isEnabled = manualEnabled
+    }
+
+    private fun refreshFontColorByBackgroundIfAuto() {
+        if (!autoContrastFontColorCheckBox.isSelected) {
+            return
+        }
+        val backgroundHex = String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF)
+        val recommendedHex = DisplaySettings.getRecommendedFontColor(backgroundHex)
+        setPresetFontColor(recommendedHex)
     }
 
     private fun updatePresetSelection(color: Color) {
@@ -558,6 +722,18 @@ class HelloReadSettingComponent : SearchableConfigurable {
             else -> {
                 darkPresetRadio.isSelected = false
                 lightPresetRadio.isSelected = false
+            }
+        }
+    }
+
+    private fun updateFontPresetSelection(color: Color) {
+        val normalizedColor = String.format("#%06X", color.rgb and 0xFFFFFF)
+        when {
+            normalizedColor.equals(DisplaySettings.DARK_THEME_FONT, ignoreCase = true) -> darkFontPresetRadio.isSelected = true
+            normalizedColor.equals(DisplaySettings.LIGHT_THEME_FONT, ignoreCase = true) -> lightFontPresetRadio.isSelected = true
+            else -> {
+                darkFontPresetRadio.isSelected = false
+                lightFontPresetRadio.isSelected = false
             }
         }
     }
@@ -573,6 +749,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
             
             val newFontSettings = FontSettings(fontFamily, fontSize, lineSpacing, paragraphSpacing)
             val backgroundColor = String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF)
+            val fontColor = String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF)
             val newDisplaySettings = DisplaySettings(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
@@ -581,10 +758,14 @@ class HelloReadSettingComponent : SearchableConfigurable {
                 // 临时下线设置项：沿用当前值，避免隐藏后误改配置
                 currentDisplaySettings.statusBarAutoScroll,
                 currentDisplaySettings.statusBarScrollInterval,
-                backgroundColor
+                backgroundColor,
+                fontColor,
+                autoContrastFontColorCheckBox.isSelected
             )
             
-            return newFontSettings != originalFontSettings || newDisplaySettings != originalDisplaySettings
+            return newFontSettings != originalFontSettings ||
+                newDisplaySettings != originalDisplaySettings ||
+                showToolWindowHeaderCheckBox.isSelected != originalToolWindowHeaderVisible
         } catch (e: Exception) {
             return false
         }
@@ -603,6 +784,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
             
             val newFontSettings = FontSettings(fontFamily, fontSize, lineSpacing, paragraphSpacing)
             val backgroundColor = String.format("#%06X", backgroundColorPreview.background.rgb and 0xFFFFFF)
+            val fontColor = String.format("#%06X", fontColorPreview.foreground.rgb and 0xFFFFFF)
             val newDisplaySettings = DisplaySettings(
                 hideOperationPanelCheckBox.isSelected,
                 hideTitleButtonCheckBox.isSelected,
@@ -611,7 +793,9 @@ class HelloReadSettingComponent : SearchableConfigurable {
                 // 临时下线设置项：沿用当前值，避免隐藏后误改配置
                 currentDisplaySettings.statusBarAutoScroll,
                 currentDisplaySettings.statusBarScrollInterval,
-                backgroundColor
+                backgroundColor,
+                fontColor,
+                autoContrastFontColorCheckBox.isSelected
             )
             
             if (newFontSettings.isValid() && newDisplaySettings.isValid()) {
@@ -624,6 +808,11 @@ class HelloReadSettingComponent : SearchableConfigurable {
                 displaySettingsService.saveDisplaySettings(newDisplaySettings)
                 currentDisplaySettings = newDisplaySettings
                 originalDisplaySettings = newDisplaySettings
+
+                val newToolWindowHeaderVisible = showToolWindowHeaderCheckBox.isSelected
+                displaySettingsService.saveToolWindowHeaderVisible(newToolWindowHeaderVisible)
+                currentToolWindowHeaderVisible = newToolWindowHeaderVisible
+                originalToolWindowHeaderVisible = newToolWindowHeaderVisible
                 
                 // 通知阅读器更新设置
                 currentProject?.let { project ->
@@ -633,8 +822,16 @@ class HelloReadSettingComponent : SearchableConfigurable {
                         newDisplaySettings.hideOperationPanel,
                         newDisplaySettings.hideTitleButton,
                         newDisplaySettings.hideProgressLabel,
-                        newDisplaySettings.backgroundColor
+                        newDisplaySettings.backgroundColor,
+                        newDisplaySettings.fontColor,
+                        newDisplaySettings.autoContrastFontColor
                     )
+
+                    val toolWindow = ToolWindowManager.getInstance(project)
+                        .getToolWindow(TabConstants.HELLO_READ_TOOL_WINDOW_ID)
+                    if (toolWindow != null) {
+                        ToolWindowHeaderVisibilityHelper.apply(toolWindow, newToolWindowHeaderVisible)
+                    }
                 }
             } else {
                 throw ConfigurationException("设置无效，请检查输入值")
