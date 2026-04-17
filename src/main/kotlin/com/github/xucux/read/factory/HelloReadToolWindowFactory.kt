@@ -1,11 +1,13 @@
 package com.github.xucux.read.factory
 
+import com.github.xucux.read.action.OpenReadingSettingsGearAction
 import com.github.xucux.read.constants.TabConstants
 import com.github.xucux.read.ui.BookReaderToolWindow
 import com.github.xucux.read.ui.BookshelfToolWindow
 import com.github.xucux.read.ui.ChapterListToolWindow
 import com.github.xucux.read.ui.SettingsToolWindow
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
@@ -17,6 +19,14 @@ import com.intellij.ui.content.ContentManagerEvent
  * 整合书架、阅读器、章节列表和设置功能
  */
 class HelloReadToolWindowFactory : ToolWindowFactory {
+
+    override fun init(toolWindow: ToolWindow) {
+        val gearActions = DefaultActionGroup().apply {
+            add(OpenReadingSettingsGearAction())
+        }
+        toolWindow.setAdditionalGearActions(gearActions)
+        super.init(toolWindow)
+    }
     
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         // 创建各个组件

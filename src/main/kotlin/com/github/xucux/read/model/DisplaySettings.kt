@@ -1,6 +1,6 @@
 package com.github.xucux.read.model
 
-import com.intellij.util.ui.UIUtil
+import com.intellij.ui.JBColor
 import java.awt.Color
 
 /**
@@ -50,11 +50,10 @@ data class DisplaySettings(
          */
         public fun getDefaultBackgroundColor(): String {
             return try {
-                // 检查是否为深色主题
-                if (UIUtil.isUnderDarcula()) {
-                    DARK_THEME_BACKGROUND
-                } else {
+                if (JBColor.isBright()) {
                     LIGHT_THEME_BACKGROUND
+                } else {
+                    DARK_THEME_BACKGROUND
                 }
             } catch (e: Exception) {
                 // 如果无法检测主题，默认使用深色主题

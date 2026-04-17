@@ -28,5 +28,5 @@ object TabConstants {
     /**
      * 设置标签页名称
      */
-    const val SETTINGS_TAB = "View"
+    const val SETTINGS_TAB = "Config"
 }
