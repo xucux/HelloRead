@@ -22,7 +22,7 @@ import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import javax.swing.*
-import javax.swing.JSpinner.NumberEditor
+import javax.swing.BorderFactory
 import javax.swing.SpinnerNumberModel
 import javax.swing.text.*
 
@@ -196,7 +196,7 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
         previewArea.toolTipText = "预览模式，不可编辑"
 
         val scrollPane = JBScrollPane(previewArea)
-        scrollPane.border = JBUI.Borders.compound(
+        scrollPane.border = BorderFactory.createCompoundBorder(
             JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
             JBUI.Borders.empty(5)
         )
@@ -844,13 +844,13 @@ class SettingsToolWindow(private val project: Project) : SimpleToolWindowPanel(t
     }
 
     private fun initNumericSpinners() {
-        val lineEditor = NumberEditor(lineSpacingSpinner, "0.0")
+        val lineEditor = JSpinner.NumberEditor(lineSpacingSpinner, "0.0")
         val lineFormatter = lineEditor.textField.formatter as? NumberFormatter
         lineFormatter?.allowsInvalid = false
         lineFormatter?.commitsOnValidEdit = true
         lineSpacingSpinner.editor = lineEditor
 
-        val paragraphEditor = NumberEditor(paragraphSpacingSpinner, "0")
+        val paragraphEditor = JSpinner.NumberEditor(paragraphSpacingSpinner, "0")
         val paragraphFormatter = paragraphEditor.textField.formatter as? NumberFormatter
         paragraphFormatter?.allowsInvalid = false
         paragraphFormatter?.commitsOnValidEdit = true

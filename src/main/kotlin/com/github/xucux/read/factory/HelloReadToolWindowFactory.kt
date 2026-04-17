@@ -13,6 +13,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.openapi.wm.ex.ToolWindowEx
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.ui.content.ContentManagerEvent
@@ -31,7 +32,7 @@ class HelloReadToolWindowFactory : ToolWindowFactory {
             add(OpenReadingSettingsGearAction())
             add(ToggleMainToolbarGearAction())
         }
-        toolWindow.setAdditionalGearActions(gearActions)
+        (toolWindow as? ToolWindowEx)?.setAdditionalGearActions(gearActions)
         super.init(toolWindow)
     }
     
@@ -43,9 +44,10 @@ class HelloReadToolWindowFactory : ToolWindowFactory {
 //        val settingWindows = SettingsToolWindow(project)
         
         // 创建内容
-        val bookshelfContent = ContentFactory.getInstance().createContent(bookshelfToolWindow, TabConstants.BOOKSHELF_TAB, false)
-        val bookReaderContent = ContentFactory.getInstance().createContent(bookReaderToolWindow, TabConstants.READER_TAB, false)
-        val chapterListContent = ContentFactory.getInstance().createContent(chapterListWindow, TabConstants.CHAPTER_LIST_TAB, false)
+        val contentFactory = ContentFactory.SERVICE.getInstance()
+        val bookshelfContent = contentFactory.createContent(bookshelfToolWindow, TabConstants.BOOKSHELF_TAB, false)
+        val bookReaderContent = contentFactory.createContent(bookReaderToolWindow, TabConstants.READER_TAB, false)
+        val chapterListContent = contentFactory.createContent(chapterListWindow, TabConstants.CHAPTER_LIST_TAB, false)
 //        val settingsContent = ContentFactory.getInstance().createContent(settingWindows, TabConstants.SETTINGS_TAB, false)
         
         // 添加ContentManagerListener来监听内容选择事件

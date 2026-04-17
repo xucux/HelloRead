@@ -30,6 +30,7 @@ import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import javax.swing.*
+import javax.swing.BorderFactory
 import javax.swing.border.TitledBorder
 import javax.swing.text.*
 
@@ -236,7 +237,7 @@ class HelloReadSettingComponent : SearchableConfigurable {
         
         // 预览区域
         val scrollPane = JBScrollPane(previewArea)
-        scrollPane.border = JBUI.Borders.compound(
+        scrollPane.border = BorderFactory.createCompoundBorder(
             JBUI.Borders.customLine(JBUI.CurrentTheme.DefaultTabs.borderColor()),
             JBUI.Borders.empty(5)
         )
@@ -418,13 +419,13 @@ class HelloReadSettingComponent : SearchableConfigurable {
             1
         )
 
-        val lineEditor = NumberEditor(lineSpacingSpinner, "0.0")
+        val lineEditor = JSpinner.NumberEditor(lineSpacingSpinner, "0.0")
         val lineFormatter = lineEditor.textField.formatter as? NumberFormatter
         lineFormatter?.allowsInvalid = false
         lineFormatter?.commitsOnValidEdit = true
         lineSpacingSpinner.editor = lineEditor
 
-        val paragraphEditor = NumberEditor(paragraphSpacingSpinner, "0")
+        val paragraphEditor = JSpinner.NumberEditor(paragraphSpacingSpinner, "0")
         val paragraphFormatter = paragraphEditor.textField.formatter as? NumberFormatter
         paragraphFormatter?.allowsInvalid = false
         paragraphFormatter?.commitsOnValidEdit = true
