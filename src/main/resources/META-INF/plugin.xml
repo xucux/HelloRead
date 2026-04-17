@@ -6,9 +6,12 @@
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
     <name>HelloRead</name>
-    <version>1.0.7-231</version>
+    <version>1.0.8-231</version>
     <change-notes>
         <![CDATA[
+    <p>1.0.8</p>
+    <p>- Optimize the config ui </p>
+    <p>- Toggle Top Bar </p>
     <p>1.0.7</p>
     <p>- Support 261</p>
     <p>1.0.6</p>
